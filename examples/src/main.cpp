@@ -1,7 +1,7 @@
-#include <iostream>
+#include "NE/Core/Core.h"
 
 int main()
 {
-    std::cout << "Hello, World!" << std::endl;
+    null::debug::Message("Hello %s!", "World");
     return 0;
 }
