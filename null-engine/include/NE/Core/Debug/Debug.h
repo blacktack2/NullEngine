@@ -1,8 +1,5 @@
-/**
- * Debug.h
- */
-#ifndef EXAMPLE_DEBUG_H
-#define EXAMPLE_DEBUG_H
+#ifndef NULLENGINE_DEBUG_H
+#define NULLENGINE_DEBUG_H
 
 #ifdef NE_CUSTOM_DEBUG_IMPL
 #define NE_DEBUG_DECL(decl) decl;
@@ -31,4 +28,4 @@ namespace null
 #include "Debug.inl"
 #endif
 
-#endif //EXAMPLE_DEBUG_H
+#endif //NULLENGINE_DEBUG_H

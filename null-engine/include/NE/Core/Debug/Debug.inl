@@ -1,7 +1,3 @@
-/**
- * Debug.cpp
- */
-
 #ifdef NE_DEBUG_STANDARD_IMPL
 
 #include <csignal>
