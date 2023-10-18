@@ -1,7 +1,6 @@
 /**
  * Debug.cpp
  */
-#include "Debug.h"
 
 #ifdef NE_DEBUG_STANDARD_IMPL
 

@@ -531,4 +531,4 @@ FodyWeavers.xsd
 # JetBrains Rider
 *.sln.iml
 
-!NE/Core/Debug/
+!null-engine/include/NE/Core/Debug/
