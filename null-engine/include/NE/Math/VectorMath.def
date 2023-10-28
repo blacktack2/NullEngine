@@ -1,0 +1,144 @@
+/**
+ * See VectorMath.h for the implementation types used for this X-Macro definition file (as well as example usage).
+ * This file declares the types
+ */
+
+#if !defined(NE_VECTORMATH_VECTOR_CLASS) || !defined(NE_VECTORMATH_VECTOR_TYPE)
+#error "Must define the corresponding vector types before including this file"
+#endif //!defined(NE_VECTORMATH_VECTOR_CLASS) || !defined(NE_VECTORMATH_VECTOR_TYPE)
+#if !defined(NE_MATH_INL_CEX) ||!defined(NE_MATH_INL) ||!defined(NE_MATH_CEX)
+#error "Must define meth method prefixes"
+#endif //!defined(NE_MATH_INL_CEX) ||!defined(NE_MATH_INL) ||!defined(NE_MATH_CEX)
+
+#define NE_COMPONENT NE_VECTORMATH_VECTOR_TYPE
+
+#define NE_VECTOR1 NE_VECTORMATH_VECTOR_CLASS(1)
+#define NE_VECTOR1_ARG NE_VECTORMATH_VECTOR_CLASS_ARG(1)
+
+#define NE_VECTOR2 NE_VECTORMATH_VECTOR_CLASS(2)
+#define NE_VECTOR2_ARG NE_VECTORMATH_VECTOR_CLASS_ARG(2)
+
+#define NE_VECTOR3 NE_VECTORMATH_VECTOR_CLASS(3)
+#define NE_VECTOR3_ARG NE_VECTORMATH_VECTOR_CLASS_ARG(3)
+
+#define NE_VECTOR4 NE_VECTORMATH_VECTOR_CLASS(4)
+#define NE_VECTOR4_ARG NE_VECTORMATH_VECTOR_CLASS_ARG(4)
+
+namespace null
+{
+    namespace math
+    {
+        class NE_VECTOR1
+        {
+        public:
+            union
+            {
+                NE_COMPONENT x;
+                NE_COMPONENT r;
+            };
+        public:
+            NE_MATH_INL_CEX NE_VECTOR1();
+            NE_MATH_INL_CEX NE_VECTOR1(NE_COMPONENT x);
+
+            NE_MATH_INL_CEX NE_VECTOR1(const NE_VECTOR1& other);
+            NE_MATH_INL_CEX NE_VECTOR1(NE_VECTOR1&& other);
+            NE_MATH_INL_CEX NE_VECTOR1& operator=(const NE_VECTOR1& other);
+            NE_MATH_INL_CEX NE_VECTOR1& operator=(NE_VECTOR1&& other);
+
+            NE_MATH_INL_CEX NE_VECTOR1& operator=(NE_COMPONENT x);
+            NE_MATH_INL_CEX operator NE_COMPONENT() const;
+        };
+
+        class NE_VECTOR2
+        {
+        public:
+            union
+            {
+                struct { NE_COMPONENT x, y; };
+                struct { NE_COMPONENT r, g; };
+            };
+        public:
+            NE_MATH_INL_CEX NE_VECTOR2();
+            /**
+             * Assign value to all components
+             */
+            explicit NE_MATH_INL_CEX NE_VECTOR2(NE_COMPONENT value);
+            NE_MATH_INL_CEX NE_VECTOR2(NE_COMPONENT x, NE_COMPONENT y);
+
+            NE_MATH_INL_CEX NE_VECTOR2(const NE_VECTOR2& other);
+            NE_MATH_INL_CEX NE_VECTOR2(NE_VECTOR2&& other);
+            NE_MATH_INL_CEX NE_VECTOR2& operator=(const NE_VECTOR2& other);
+            NE_MATH_INL_CEX NE_VECTOR2& operator=(NE_VECTOR2&& other);
+        };
+
+        class NE_VECTOR3
+        {
+        public:
+            union
+            {
+                struct { NE_COMPONENT x, y, z; };
+                struct { NE_COMPONENT r, g, b; };
+            };
+        public:
+            NE_MATH_INL_CEX NE_VECTOR3();
+            /**
+             * Assign value to all components
+             */
+            explicit NE_MATH_INL_CEX NE_VECTOR3(NE_COMPONENT value);
+            NE_MATH_INL_CEX NE_VECTOR3(NE_COMPONENT x, NE_COMPONENT y, NE_COMPONENT z);
+            NE_MATH_INL_CEX NE_VECTOR3(NE_VECTOR2_ARG xy, NE_COMPONENT z);
+            NE_MATH_INL_CEX NE_VECTOR3(NE_COMPONENT x, NE_VECTOR2_ARG yz);
+
+            NE_MATH_INL_CEX NE_VECTOR3(const NE_VECTOR3& other);
+            NE_MATH_INL_CEX NE_VECTOR3(NE_VECTOR3&& other);
+            NE_MATH_INL_CEX NE_VECTOR3& operator=(const NE_VECTOR3& other);
+            NE_MATH_INL_CEX NE_VECTOR3& operator=(NE_VECTOR3&& other);
+        };
+
+        class NE_VECTOR4
+        {
+        public:
+            union
+            {
+                struct { NE_COMPONENT x, y, z, w; };
+                struct { NE_COMPONENT r, g, b, a; };
+            };
+        public:
+            NE_MATH_INL_CEX NE_VECTOR4();
+            /**
+             * Assign value to all components
+             */
+            explicit NE_MATH_INL_CEX NE_VECTOR4(NE_COMPONENT value);
+            NE_MATH_INL_CEX NE_VECTOR4(NE_COMPONENT x, NE_COMPONENT y, NE_COMPONENT z, NE_COMPONENT w);
+            NE_MATH_INL_CEX NE_VECTOR4(NE_VECTOR2_ARG xy, NE_COMPONENT z, NE_COMPONENT w);
+            NE_MATH_INL_CEX NE_VECTOR4(NE_COMPONENT x, NE_VECTOR2_ARG yz, NE_COMPONENT w);
+            NE_MATH_INL_CEX NE_VECTOR4(NE_COMPONENT x, NE_COMPONENT y, NE_VECTOR2_ARG zw);
+            NE_MATH_INL_CEX NE_VECTOR4(NE_VECTOR2_ARG xy, NE_VECTOR2_ARG zw);
+            NE_MATH_INL_CEX NE_VECTOR4(NE_VECTOR3_ARG xyz, NE_COMPONENT w);
+            NE_MATH_INL_CEX NE_VECTOR4(NE_COMPONENT x, NE_VECTOR3_ARG yzw);
+
+            NE_MATH_INL_CEX NE_VECTOR4(const NE_VECTOR4& other);
+            NE_MATH_INL_CEX NE_VECTOR4(NE_VECTOR4&& other);
+            NE_MATH_INL_CEX NE_VECTOR4& operator=(const NE_VECTOR4& other);
+            NE_MATH_INL_CEX NE_VECTOR4& operator=(NE_VECTOR4&& other);
+        };
+    }
+}
+
+#ifdef NE_MATH_INLINE_IMPL
+#include "VectorMath.inl"
+#endif //NE_MATH_INLINE_IMPL
+
+#undef NE_COMPONENT
+
+#undef NE_VECTOR1
+#undef NE_VECTOR1_ARG
+
+#undef NE_VECTOR2
+#undef NE_VECTOR2_ARG
+
+#undef NE_VECTOR3
+#undef NE_VECTOR3_ARG
+
+#undef NE_VECTOR4
+#undef NE_VECTOR4_ARG

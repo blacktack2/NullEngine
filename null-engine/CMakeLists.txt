@@ -5,9 +5,10 @@ set(CMAKE_CXX_STANDARD 20)
 
 file(GLOB_RECURSE NULL_SRC CMAKE_CONFIGURE_DEPENDS "src/*.cpp")
 file(GLOB_RECURSE NULL_INL CMAKE_CONFIGURE_DEPENDS "include/*.inl")
+file(GLOB_RECURSE NULL_DEF CMAKE_CONFIGURE_DEPENDS "include/*.def")
 file(GLOB_RECURSE NULL_HEAD CMAKE_CONFIGURE_DEPENDS "include/*.h")
 
-add_library(null_engine ${NULL_SRC} ${NULL_INL} ${NULL_HEAD})
+add_library(null_engine ${NULL_SRC} ${NULL_INL} ${NULL_DEF} ${NULL_HEAD})
 target_include_directories(null_engine PUBLIC include)
 
 if (CMAKE_BUILD_TYPE MATCHES Debug)
