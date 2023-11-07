@@ -3,7 +3,7 @@
  * This file declares the types
  */
 
-#if !defined(NE_VECTORMATH_VECTOR_CLASS) || !defined(NE_VECTORMATH_VECTOR_TYPE)
+#if !defined(NE_VECTORMATH_VECTOR_TYPE) || !defined(NE_VECTORMATH_VECTOR_CLASS) || !defined(NE_VECTORMATH_VECTOR_CLASS_ARG)
 #error "Must define the corresponding vector types before including this file"
 #endif //!defined(NE_VECTORMATH_VECTOR_CLASS) || !defined(NE_VECTORMATH_VECTOR_TYPE)
 #if !defined(NE_MATH_INL_CEX) ||!defined(NE_MATH_INL) ||!defined(NE_MATH_CEX)
