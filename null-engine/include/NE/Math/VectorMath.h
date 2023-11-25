@@ -6,7 +6,8 @@
 #ifndef NULLENGINE_VECTOR_H
 #define NULLENGINE_VECTOR_H
 
-#include "MathTypes.h"
+#include "NE/Math/MathTypes.h"
+#include "NE/Core/Debug/Debug.h"
 
 #ifndef NE_MATH_DISABLE_INLINE
 #define NE_MATH_INLINE_IMPL
@@ -22,24 +23,37 @@
 
 #define NE_MATH_INL_CEX NE_MATH_INL NE_MATH_CEX
 
-#define NE_VECTORMATH_VECTOR_CLASS(n) Float##n
-#define NE_VECTORMATH_VECTOR_CLASS_ARG(n) Float##n##_arg
+// BoolN
+#define NE_VECTORMATH_VECTOR_CLASS Bool
+#define NE_VECTORMATH_VECTOR_TYPE bool
+
+#define NE_VECTORMATH_OP_COMPARISON
+#define NE_VECTORMATH_OP_LOGICAL
+
+#include "VectorMath.def"
+
+// FloatN
+#define NE_VECTORMATH_VECTOR_CLASS Float
 #define NE_VECTORMATH_VECTOR_TYPE float
 
+#define NE_VECTORMATH_OP_COMPARISON
+#define NE_VECTORMATH_OP_LOGICAL
+#define NE_VECTORMATH_OP_ARITHMETIC
+
 #include "VectorMath.def"
 
-#undef NE_VECTORMATH_VECTOR_CLASS
-#undef NE_VECTORMATH_VECTOR_CLASS_ARG
-#undef NE_VECTORMATH_VECTOR_TYPE
-
-#define NE_VECTORMATH_VECTOR_CLASS(n) Integer##n
-#define NE_VECTORMATH_VECTOR_CLASS_ARG(n) Integer##n##_arg
+// IntegerN
+#define NE_VECTORMATH_VECTOR_CLASS Integer
 #define NE_VECTORMATH_VECTOR_TYPE null::math::sint32
 
-#include "VectorMath.def"
+#define NE_VECTORMATH_OP_COMPARISON
+#define NE_VECTORMATH_OP_LOGICAL
+#define NE_VECTORMATH_OP_BITWISE
+#define NE_VECTORMATH_OP_BITSHIFT
+#define NE_VECTORMATH_OP_ARITHMETIC
+#define NE_VECTORMATH_OP_MODULO
+#define NE_VECTORMATH_OP_INC_DEC
 
-#undef NE_VECTORMATH_VECTOR_CLASS
-#undef NE_VECTORMATH_VECTOR_CLASS_ARG
-#undef NE_VECTORMATH_VECTOR_TYPE
+#include "VectorMath.def"
 
 #endif //NULLENGINE_VECTOR_H

@@ -1,6 +1,10 @@
 #ifndef EXAMPLE_MATHTYPES_H
 #define EXAMPLE_MATHTYPES_H
 
+#include "NE/Common.h"
+
+#include <cstddef>
+
 namespace null
 {
     namespace math
@@ -34,6 +38,9 @@ NE_VECTORMATH_CLASS_DECL(type##3x4)\
 NE_VECTORMATH_CLASS_DECL(type##Quat)\
 
         // VectorMath types
+
+        NE_VECTOR_CLASS_DECL(Bool);
+
         NE_VECTOR_CLASS_DECL(Float);
         NE_MATRIX_CLASS_DECL(Float);
         NE_QUAT_CLASS_DECL(Float);
