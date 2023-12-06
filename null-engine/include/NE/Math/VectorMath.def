@@ -2,7 +2,7 @@
  * See VectorMath.h for the implementation types used for this X-Macro definition file (as well as example usage).
  * If any boolean operations are to be included, the Bool vectors must be defined first.
  * This file uses the following macros (all of which are removed via undef at the end of this file)
- * Requred:
+ * Required:
  * - NE_VECTORMATH_VECTOR_CLASS(n) - Should append n to the name of the vector class (e.g. Float)
  * - NE_VECTORMATH_VECTOR_TYPE - The actual type of components (e.g. float)
  * Optional:
@@ -17,23 +17,63 @@
 #if !defined(NE_VECTORMATH_VECTOR_TYPE) || !defined(NE_VECTORMATH_VECTOR_CLASS)
 #error "Must define the corresponding vector types before including this file"
 #endif //!defined(NE_VECTORMATH_VECTOR_CLASS) || !defined(NE_VECTORMATH_VECTOR_TYPE)
-#if !defined(NE_MATH_INL_CEX) ||!defined(NE_MATH_INL) ||!defined(NE_MATH_CEX)
+#if !defined(NE_MATH_INL_CEX) || !defined(NE_MATH_INL) || !defined(NE_MATH_CEX)
 #error "Must define math function declaration prefixes"
 #endif //!defined(NE_MATH_INL_CEX) ||!defined(NE_MATH_INL) ||!defined(NE_MATH_CEX)
 
 #define NE_COMPONENT NE_VECTORMATH_VECTOR_TYPE
 
-#define NE_VECTOR1 NE_CONCAT(NE_VECTORMATH_VECTOR_CLASS, 1)
-#define NE_VECTOR1_ARG NE_CONCAT(NE_VECTOR1, _arg)
+#define NE_BOOLN(N) NE_CONCAT(Bool, N)
+#define NE_BOOLN_ARG(N) NE_CONCAT(NE_BOOLN(N), _arg)
 
-#define NE_VECTOR2 NE_CONCAT(NE_VECTORMATH_VECTOR_CLASS, 2)
-#define NE_VECTOR2_ARG NE_CONCAT(NE_VECTOR2, _arg)
+#define NE_VECTORN(N) NE_CONCAT(NE_VECTORMATH_VECTOR_CLASS, N)
+#define NE_VECTORN_ARG(N) NE_CONCAT(NE_VECTORN(N), _arg)
 
-#define NE_VECTOR3 NE_CONCAT(NE_VECTORMATH_VECTOR_CLASS, 3)
-#define NE_VECTOR3_ARG NE_CONCAT(NE_VECTOR3, _arg)
+#define NE_VECTOR1     NE_VECTORN(1)
+#define NE_VECTOR1_ARG NE_VECTORN_ARG(1)
 
-#define NE_VECTOR4 NE_CONCAT(NE_VECTORMATH_VECTOR_CLASS, 4)
-#define NE_VECTOR4_ARG NE_CONCAT(NE_VECTOR4, _arg)
+#define NE_VECTOR2     NE_VECTORN(2)
+#define NE_VECTOR2_ARG NE_VECTORN_ARG(2)
+
+#define NE_VECTOR3     NE_VECTORN(3)
+#define NE_VECTOR3_ARG NE_VECTORN_ARG(3)
+
+#define NE_VECTOR4     NE_VECTORN(4)
+#define NE_VECTOR4_ARG NE_VECTORN_ARG(4)
+
+#define NE_VECTOR_COPY_SWAP_DECL(N)                                   \
+NE_MATH_INL_CEX NE_VECTORN(N)(const NE_VECTORN(N)& other);            \
+NE_MATH_INL_CEX NE_VECTORN(N)(NE_VECTORN(N)&& other);                 \
+NE_MATH_INL_CEX NE_VECTORN(N)& operator=(const NE_VECTORN(N)& other); \
+NE_MATH_INL_CEX NE_VECTORN(N)& operator=(NE_VECTORN(N)&& other);
+
+#define NE_VECTOR_INDEX_DECL(N)                            \
+NE_MATH_INL_CEX NE_COMPONENT& operator[](std::size_t idx); \
+NE_MATH_INL_CEX NE_COMPONENT operator[](std::size_t idx) const;
+
+#define NE_VECTOR_ASSIGNMENT_DECL(N, Op)                   \
+NE_MATH_INL_CEX NE_VECTORN(N)& operator Op (NE_COMPONENT); \
+NE_MATH_INL_CEX NE_VECTORN(N)& operator Op (NE_VECTORN_ARG(N));
+
+#define NE_VECTOR_INC_DEC_DECL(N, Op)             \
+NE_MATH_INL_CEX NE_VECTORN(N)& operator Op ();    \
+NE_MATH_INL_CEX NE_VECTORN(N) operator Op (int);
+
+#define NE_VECTOR_FREE_UNARY_DECL(N, Op) \
+NE_MATH_INL_CEX NE_VECTORN(N) operator Op (NE_VECTORN_ARG(N));
+
+#define NE_VECTOR_FREE_BINARY_DECL(N, Op)                                    \
+NE_MATH_INL_CEX NE_VECTORN(N) operator Op (NE_VECTORN_ARG(N), NE_COMPONENT); \
+NE_MATH_INL_CEX NE_VECTORN(N) operator Op (NE_COMPONENT, NE_VECTORN_ARG(N)); \
+NE_MATH_INL_CEX NE_VECTORN(N) operator Op (NE_VECTORN_ARG(N), NE_VECTORN_ARG(N));
+
+#define NE_VECTOR_FREE_UNARY_COMP_DECL(N, Op) \
+NE_MATH_INL_CEX NE_BOOLN(N) operator Op (NE_VECTORN_ARG(N));
+
+#define NE_VECTOR_FREE_BINARY_COMP_DECL(N, Op)                             \
+NE_MATH_INL_CEX NE_BOOLN(N) operator Op (NE_VECTORN_ARG(N), NE_COMPONENT); \
+NE_MATH_INL_CEX NE_BOOLN(N) operator Op (NE_COMPONENT, NE_VECTORN_ARG(N)); \
+NE_MATH_INL_CEX NE_BOOLN(N) operator Op (NE_VECTORN_ARG(N), NE_VECTORN_ARG(N));
 
 namespace null
 {
@@ -44,122 +84,71 @@ namespace null
         public:
             union
             {
-                NE_COMPONENT x;
-                NE_COMPONENT r;
+                [[maybe_unused]] NE_COMPONENT v[1];
+                [[maybe_unused]] NE_COMPONENT x;
+                [[maybe_unused]] NE_COMPONENT r;
             };
         public:
             NE_MATH_INL_CEX NE_VECTOR1();
             NE_MATH_INL_CEX NE_VECTOR1(NE_COMPONENT x);
 
-            NE_MATH_INL_CEX NE_VECTOR1(const NE_VECTOR1& other);
-            NE_MATH_INL_CEX NE_VECTOR1(NE_VECTOR1&& other);
-            NE_MATH_INL_CEX NE_VECTOR1& operator=(const NE_VECTOR1& other);
-            NE_MATH_INL_CEX NE_VECTOR1& operator=(NE_VECTOR1&& other);
+            NE_VECTOR_COPY_SWAP_DECL(1);
 
             NE_MATH_INL_CEX NE_VECTOR1& operator=(NE_COMPONENT x);
             NE_MATH_INL_CEX operator NE_COMPONENT() const;
 
-            NE_MATH_INL_CEX NE_COMPONENT& operator[](std::size_t idx);
-            NE_MATH_INL_CEX NE_COMPONENT operator[](std::size_t idx) const;
-
+            NE_VECTOR_INDEX_DECL(1)
 #ifdef NE_VECTORMATH_OP_ARITHMETIC
-            NE_MATH_INL_CEX NE_VECTOR1& operator+=(NE_COMPONENT scalar);
-            NE_MATH_INL_CEX NE_VECTOR1& operator+=(NE_VECTOR1_ARG other);
-
-            NE_MATH_INL_CEX NE_VECTOR1& operator-=(NE_COMPONENT scalar);
-            NE_MATH_INL_CEX NE_VECTOR1& operator-=(NE_VECTOR1_ARG other);
-
-            NE_MATH_INL_CEX NE_VECTOR1& operator*=(NE_COMPONENT scalar);
-            NE_MATH_INL_CEX NE_VECTOR1& operator*=(NE_VECTOR1_ARG other);
-
-            NE_MATH_INL_CEX NE_VECTOR1& operator/=(NE_COMPONENT scalar);
-            NE_MATH_INL_CEX NE_VECTOR1& operator/=(NE_VECTOR1_ARG other);
+            NE_VECTOR_ASSIGNMENT_DECL(1, +=)
+            NE_VECTOR_ASSIGNMENT_DECL(1, -=)
+            NE_VECTOR_ASSIGNMENT_DECL(1, *=)
+            NE_VECTOR_ASSIGNMENT_DECL(1, /=)
 #endif //NE_VECTORMATH_OP_ARITHMETIC
 
 #ifdef NE_VECTORMATH_OP_MODULO
-            NE_MATH_INL_CEX NE_VECTOR1 operator%=(NE_COMPONENT scalar);
-            NE_MATH_INL_CEX NE_VECTOR1 operator%=(NE_VECTOR1_ARG other);
+            NE_VECTOR_ASSIGNMENT_DECL(1, %=)
 #endif //NE_VECTORMATH_OP_MODULO
 
 #ifdef NE_VECTORMATH_OP_INC_DEC
-            NE_MATH_INL_CEX NE_VECTOR1& operator++();
-            NE_MATH_INL_CEX NE_VECTOR1 operator++(int);
-            NE_MATH_INL_CEX NE_VECTOR1& operator--();
-            NE_MATH_INL_CEX NE_VECTOR1 operator--(int);
+            NE_VECTOR_INC_DEC_DECL(1, ++)
+            NE_VECTOR_INC_DEC_DECL(1, --)
 #endif //NE_VECTORMATH_OP_INC_DEC
         };
 
 #ifdef NE_VECTORMATH_OP_COMPARISON
-        NE_MATH_INL_CEX Bool1 operator==(NE_COMPONENT scalar, NE_VECTOR1_ARG vector);
-        NE_MATH_INL_CEX Bool1 operator==(NE_VECTOR1_ARG vector, NE_COMPONENT scalar);
-        NE_MATH_INL_CEX Bool1 operator==(NE_VECTOR1_ARG vectorA, NE_VECTOR1_ARG vectorB);
-
-        NE_MATH_INL_CEX Bool1 operator!=(NE_COMPONENT scalar, NE_VECTOR1_ARG vector);
-        NE_MATH_INL_CEX Bool1 operator!=(NE_VECTOR1_ARG vector, NE_COMPONENT scalar);
-        NE_MATH_INL_CEX Bool1 operator!=(NE_VECTOR1_ARG vectorA, NE_VECTOR1_ARG vectorB);
+        NE_VECTOR_FREE_BINARY_COMP_DECL(1, ==)
+        NE_VECTOR_FREE_BINARY_COMP_DECL(1, !=)
 #endif //NE_VECTORMATH_OP_COMPARISON
 
 #ifdef NE_VECTORMATH_OP_LOGICAL
-        NE_MATH_INL_CEX Bool1 operator!(NE_VECTOR1_ARG vector);
+        NE_VECTOR_FREE_UNARY_COMP_DECL(1, !)
 
-        NE_MATH_INL_CEX Bool1 operator&&(NE_COMPONENT scalar, NE_VECTOR1_ARG vector);
-        NE_MATH_INL_CEX Bool1 operator&&(NE_VECTOR1_ARG vector, NE_COMPONENT scalar);
-        NE_MATH_INL_CEX Bool1 operator&&(NE_VECTOR1_ARG vectorA, NE_VECTOR1_ARG vectorB);
-
-        NE_MATH_INL_CEX Bool1 operator||(NE_COMPONENT scalar, NE_VECTOR1_ARG vector);
-        NE_MATH_INL_CEX Bool1 operator||(NE_VECTOR1_ARG vector, NE_COMPONENT scalar);
-        NE_MATH_INL_CEX Bool1 operator||(NE_VECTOR1_ARG vectorA, NE_VECTOR1_ARG vectorB);
+        NE_VECTOR_FREE_BINARY_COMP_DECL(1, &&)
+        NE_VECTOR_FREE_BINARY_COMP_DECL(1, ||)
 #endif //NE_VECTORMATH_OP_LOGICAL
 
 #ifdef NE_VECTORMATH_OP_BITWISE
-        NE_MATH_INL_CEX NE_VECTOR1 operator~(NE_VECTOR1_ARG vector);
+        NE_VECTOR_FREE_UNARY_DECL(1, ~)
 
-        NE_MATH_INL_CEX NE_VECTOR1 operator&(NE_COMPONENT scalar, NE_VECTOR1_ARG vector);
-        NE_MATH_INL_CEX NE_VECTOR1 operator&(NE_VECTOR1_ARG vector, NE_COMPONENT scalar);
-        NE_MATH_INL_CEX NE_VECTOR1 operator&(NE_VECTOR1_ARG vectorA, NE_VECTOR1_ARG vectorB);
-
-        NE_MATH_INL_CEX NE_VECTOR1 operator|(NE_COMPONENT scalar, NE_VECTOR1_ARG vector);
-        NE_MATH_INL_CEX NE_VECTOR1 operator|(NE_VECTOR1_ARG vector, NE_COMPONENT scalar);
-        NE_MATH_INL_CEX NE_VECTOR1 operator|(NE_VECTOR1_ARG vectorA, NE_VECTOR1_ARG vectorB);
-
-        NE_MATH_INL_CEX NE_VECTOR1 operator^(NE_COMPONENT scalar, NE_VECTOR1_ARG vector);
-        NE_MATH_INL_CEX NE_VECTOR1 operator^(NE_VECTOR1_ARG vector, NE_COMPONENT scalar);
-        NE_MATH_INL_CEX NE_VECTOR1 operator^(NE_VECTOR1_ARG vectorA, NE_VECTOR1_ARG vectorB);
-
-        NE_MATH_INL_CEX NE_VECTOR1 operator<<(NE_COMPONENT scalar, NE_VECTOR1_ARG vector);
-        NE_MATH_INL_CEX NE_VECTOR1 operator<<(NE_VECTOR1_ARG vector, NE_COMPONENT scalar);
-        NE_MATH_INL_CEX NE_VECTOR1 operator<<(NE_VECTOR1_ARG vectorA, NE_VECTOR1_ARG vectorB);
-
-        NE_MATH_INL_CEX NE_VECTOR1 operator>>(NE_COMPONENT scalar, NE_VECTOR1_ARG vector);
-        NE_MATH_INL_CEX NE_VECTOR1 operator>>(NE_VECTOR1_ARG vector, NE_COMPONENT scalar);
-        NE_MATH_INL_CEX NE_VECTOR1 operator>>(NE_VECTOR1_ARG vectorA, NE_VECTOR1_ARG vectorB);
+        NE_VECTOR_FREE_BINARY_DECL(1, &)
+        NE_VECTOR_FREE_BINARY_DECL(1, |)
+        NE_VECTOR_FREE_BINARY_DECL(1, ^)
+        NE_VECTOR_FREE_BINARY_DECL(1, <<)
+        NE_VECTOR_FREE_BINARY_DECL(1, >>)
 #endif //NE_VECTORMATH_OP_BITWISE
 
 #ifdef NE_VECTORMATH_OP_ARITHMETIC
-        NE_MATH_INL_CEX NE_VECTOR1 operator+(NE_VECTOR1_ARG vector);
-        NE_MATH_INL_CEX NE_VECTOR1 operator-(NE_VECTOR1_ARG vector);
+        NE_VECTOR_FREE_UNARY_DECL(1, +)
+        NE_VECTOR_FREE_UNARY_DECL(1, -)
 
-        NE_MATH_INL_CEX NE_VECTOR1 operator+(NE_COMPONENT scalar, NE_VECTOR1_ARG vector);
-        NE_MATH_INL_CEX NE_VECTOR1 operator+(NE_VECTOR1_ARG vector, NE_COMPONENT scalar);
-        NE_MATH_INL_CEX NE_VECTOR1 operator+(NE_VECTOR1_ARG vectorA, NE_VECTOR1_ARG vectorB);
-
-        NE_MATH_INL_CEX NE_VECTOR1 operator-(NE_COMPONENT scalar, NE_VECTOR1_ARG vector);
-        NE_MATH_INL_CEX NE_VECTOR1 operator-(NE_VECTOR1_ARG vector, NE_COMPONENT scalar);
-        NE_MATH_INL_CEX NE_VECTOR1 operator-(NE_VECTOR1_ARG vectorA, NE_VECTOR1_ARG vectorB);
-
-        NE_MATH_INL_CEX NE_VECTOR1 operator*(NE_COMPONENT scalar, NE_VECTOR1_ARG vector);
-        NE_MATH_INL_CEX NE_VECTOR1 operator*(NE_VECTOR1_ARG vector, NE_COMPONENT scalar);
-        NE_MATH_INL_CEX NE_VECTOR1 operator*(NE_VECTOR1_ARG vectorA, NE_VECTOR1_ARG vectorB);
-
-        NE_MATH_INL_CEX NE_VECTOR1 operator/(NE_COMPONENT scalar, NE_VECTOR1_ARG vector);
-        NE_MATH_INL_CEX NE_VECTOR1 operator/(NE_VECTOR1_ARG vector, NE_COMPONENT scalar);
-        NE_MATH_INL_CEX NE_VECTOR1 operator/(NE_VECTOR1_ARG vectorA, NE_VECTOR1_ARG vectorB);
+        NE_VECTOR_FREE_BINARY_DECL(1, +)
+        NE_VECTOR_FREE_BINARY_DECL(1, -)
+        NE_VECTOR_FREE_BINARY_DECL(1, *)
+        NE_VECTOR_FREE_BINARY_DECL(1, /)
 #endif //NE_VECTORMATH_OP_ARITHMETIC
 
 #ifdef NE_VECTORMATH_OP_MODULO
-        NE_MATH_INL_CEX NE_VECTOR1 operator%(NE_COMPONENT scalar, NE_VECTOR1_ARG vector);
-        NE_MATH_INL_CEX NE_VECTOR1 operator%(NE_VECTOR1_ARG vector, NE_COMPONENT scalar);
-        NE_MATH_INL_CEX NE_VECTOR1 operator%(NE_VECTOR1_ARG vectorA, NE_VECTOR1_ARG vectorB);
+        NE_VECTOR_FREE_BINARY_DECL(1, %)
 #endif //NE_VECTORMATH_OP_MODULO
 
         class NE_VECTOR2
@@ -167,8 +156,9 @@ namespace null
         public:
             union
             {
-                struct { NE_COMPONENT x, y; };
-                struct { NE_COMPONENT r, g; };
+                [[maybe_unused]] NE_COMPONENT v[2];
+                struct { [[maybe_unused]] NE_COMPONENT x, y; };
+                struct { [[maybe_unused]] NE_COMPONENT r, g; };
             };
         public:
             NE_MATH_INL_CEX NE_VECTOR2();
@@ -178,112 +168,60 @@ namespace null
             explicit NE_MATH_INL_CEX NE_VECTOR2(NE_COMPONENT scalar);
             NE_MATH_INL_CEX NE_VECTOR2(NE_COMPONENT x, NE_COMPONENT y);
 
-            NE_MATH_INL_CEX NE_VECTOR2(const NE_VECTOR2& other);
-            NE_MATH_INL_CEX NE_VECTOR2(NE_VECTOR2&& other);
-            NE_MATH_INL_CEX NE_VECTOR2& operator=(const NE_VECTOR2& other);
-            NE_MATH_INL_CEX NE_VECTOR2& operator=(NE_VECTOR2&& other);
+            NE_VECTOR_COPY_SWAP_DECL(2);
 
-            NE_MATH_INL_CEX NE_COMPONENT& operator[](std::size_t idx);
-            NE_MATH_INL_CEX NE_COMPONENT operator[](std::size_t idx) const;
-
+            NE_VECTOR_INDEX_DECL(2)
 #ifdef NE_VECTORMATH_OP_ARITHMETIC
-            NE_MATH_INL_CEX NE_VECTOR2& operator+=(NE_COMPONENT scalar);
-            NE_MATH_INL_CEX NE_VECTOR2& operator+=(NE_VECTOR2_ARG other);
-
-            NE_MATH_INL_CEX NE_VECTOR2& operator-=(NE_COMPONENT scalar);
-            NE_MATH_INL_CEX NE_VECTOR2& operator-=(NE_VECTOR2_ARG other);
-
-            NE_MATH_INL_CEX NE_VECTOR2& operator*=(NE_COMPONENT scalar);
-            NE_MATH_INL_CEX NE_VECTOR2& operator*=(NE_VECTOR2_ARG other);
-
-            NE_MATH_INL_CEX NE_VECTOR2& operator/=(NE_COMPONENT scalar);
-            NE_MATH_INL_CEX NE_VECTOR2& operator/=(NE_VECTOR2_ARG other);
+            NE_VECTOR_ASSIGNMENT_DECL(2, +=)
+            NE_VECTOR_ASSIGNMENT_DECL(2, -=)
+            NE_VECTOR_ASSIGNMENT_DECL(2, *=)
+            NE_VECTOR_ASSIGNMENT_DECL(2, /=)
 #endif //NE_VECTORMATH_OP_ARITHMETIC
 
 #ifdef NE_VECTORMATH_OP_MODULO
-            NE_MATH_INL_CEX NE_VECTOR2 operator%=(NE_COMPONENT scalar);
-            NE_MATH_INL_CEX NE_VECTOR2 operator%=(NE_VECTOR2_ARG other);
+            NE_VECTOR_ASSIGNMENT_DECL(2, %=)
 #endif //NE_VECTORMATH_OP_MODULO
 
 #ifdef NE_VECTORMATH_OP_INC_DEC
-            NE_MATH_INL_CEX NE_VECTOR2& operator++();
-            NE_MATH_INL_CEX NE_VECTOR2 operator++(int);
-            NE_MATH_INL_CEX NE_VECTOR2& operator--();
-            NE_MATH_INL_CEX NE_VECTOR2 operator--(int);
+            NE_VECTOR_INC_DEC_DECL(2, ++)
+            NE_VECTOR_INC_DEC_DECL(2, --)
 #endif //NE_VECTORMATH_OP_INC_DEC
         };
 
 #ifdef NE_VECTORMATH_OP_COMPARISON
-        NE_MATH_INL_CEX Bool2 operator==(NE_COMPONENT scalar, NE_VECTOR2_ARG vector);
-        NE_MATH_INL_CEX Bool2 operator==(NE_VECTOR2_ARG vector, NE_COMPONENT scalar);
-        NE_MATH_INL_CEX Bool2 operator==(NE_VECTOR2_ARG vectorA, NE_VECTOR2_ARG vectorB);
-
-        NE_MATH_INL_CEX Bool2 operator!=(NE_COMPONENT scalar, NE_VECTOR2_ARG vector);
-        NE_MATH_INL_CEX Bool2 operator!=(NE_VECTOR2_ARG vector, NE_COMPONENT scalar);
-        NE_MATH_INL_CEX Bool2 operator!=(NE_VECTOR2_ARG vectorA, NE_VECTOR2_ARG vectorB);
+        NE_VECTOR_FREE_BINARY_COMP_DECL(2, ==)
+        NE_VECTOR_FREE_BINARY_COMP_DECL(2, !=)
 #endif //NE_VECTORMATH_OP_COMPARISON
 
 #ifdef NE_VECTORMATH_OP_LOGICAL
-        NE_MATH_INL_CEX Bool2 operator!(NE_VECTOR2_ARG vector);
+        NE_VECTOR_FREE_UNARY_COMP_DECL(2, !)
 
-        NE_MATH_INL_CEX Bool2 operator&&(NE_COMPONENT scalar, NE_VECTOR2_ARG vector);
-        NE_MATH_INL_CEX Bool2 operator&&(NE_VECTOR2_ARG vector, NE_COMPONENT scalar);
-        NE_MATH_INL_CEX Bool2 operator&&(NE_VECTOR2_ARG vectorA, NE_VECTOR2_ARG vectorB);
-
-        NE_MATH_INL_CEX Bool2 operator||(NE_COMPONENT scalar, NE_VECTOR2_ARG vector);
-        NE_MATH_INL_CEX Bool2 operator||(NE_VECTOR2_ARG vector, NE_COMPONENT scalar);
-        NE_MATH_INL_CEX Bool2 operator||(NE_VECTOR2_ARG vectorA, NE_VECTOR2_ARG vectorB);
+        NE_VECTOR_FREE_BINARY_COMP_DECL(2, &&)
+        NE_VECTOR_FREE_BINARY_COMP_DECL(2, ||)
 #endif //NE_VECTORMATH_OP_LOGICAL
 
 #ifdef NE_VECTORMATH_OP_BITWISE
-        NE_MATH_INL_CEX NE_VECTOR2 operator~(NE_VECTOR2_ARG vector);
+        NE_VECTOR_FREE_UNARY_DECL(2, ~)
 
-        NE_MATH_INL_CEX NE_VECTOR2 operator&(NE_COMPONENT scalar, NE_VECTOR2_ARG vector);
-        NE_MATH_INL_CEX NE_VECTOR2 operator&(NE_VECTOR2_ARG vector, NE_COMPONENT scalar);
-        NE_MATH_INL_CEX NE_VECTOR2 operator&(NE_VECTOR2_ARG vectorA, NE_VECTOR2_ARG vectorB);
-
-        NE_MATH_INL_CEX NE_VECTOR2 operator|(NE_COMPONENT scalar, NE_VECTOR2_ARG vector);
-        NE_MATH_INL_CEX NE_VECTOR2 operator|(NE_VECTOR2_ARG vector, NE_COMPONENT scalar);
-        NE_MATH_INL_CEX NE_VECTOR2 operator|(NE_VECTOR2_ARG vectorA, NE_VECTOR2_ARG vectorB);
-
-        NE_MATH_INL_CEX NE_VECTOR2 operator^(NE_COMPONENT scalar, NE_VECTOR2_ARG vector);
-        NE_MATH_INL_CEX NE_VECTOR2 operator^(NE_VECTOR2_ARG vector, NE_COMPONENT scalar);
-        NE_MATH_INL_CEX NE_VECTOR2 operator^(NE_VECTOR2_ARG vectorA, NE_VECTOR2_ARG vectorB);
-
-        NE_MATH_INL_CEX NE_VECTOR2 operator<<(NE_COMPONENT scalar, NE_VECTOR2_ARG vector);
-        NE_MATH_INL_CEX NE_VECTOR2 operator<<(NE_VECTOR2_ARG vector, NE_COMPONENT scalar);
-        NE_MATH_INL_CEX NE_VECTOR2 operator<<(NE_VECTOR2_ARG vectorA, NE_VECTOR2_ARG vectorB);
-
-        NE_MATH_INL_CEX NE_VECTOR2 operator>>(NE_COMPONENT scalar, NE_VECTOR2_ARG vector);
-        NE_MATH_INL_CEX NE_VECTOR2 operator>>(NE_VECTOR2_ARG vector, NE_COMPONENT scalar);
-        NE_MATH_INL_CEX NE_VECTOR2 operator>>(NE_VECTOR2_ARG vectorA, NE_VECTOR2_ARG vectorB);
+        NE_VECTOR_FREE_BINARY_DECL(2, &)
+        NE_VECTOR_FREE_BINARY_DECL(2, |)
+        NE_VECTOR_FREE_BINARY_DECL(2, ^)
+        NE_VECTOR_FREE_BINARY_DECL(2, <<)
+        NE_VECTOR_FREE_BINARY_DECL(2, >>)
 #endif //NE_VECTORMATH_OP_BITWISE
 
 #ifdef NE_VECTORMATH_OP_ARITHMETIC
-        NE_MATH_INL_CEX NE_VECTOR2 operator+(NE_VECTOR2_ARG vector);
-        NE_MATH_INL_CEX NE_VECTOR2 operator-(NE_VECTOR2_ARG vector);
+        NE_VECTOR_FREE_UNARY_DECL(2, +)
+        NE_VECTOR_FREE_UNARY_DECL(2, -)
 
-        NE_MATH_INL_CEX NE_VECTOR2 operator+(NE_COMPONENT scalar, NE_VECTOR2_ARG vector);
-        NE_MATH_INL_CEX NE_VECTOR2 operator+(NE_VECTOR2_ARG vector, NE_COMPONENT scalar);
-        NE_MATH_INL_CEX NE_VECTOR2 operator+(NE_VECTOR2_ARG vectorA, NE_VECTOR2_ARG vectorB);
-
-        NE_MATH_INL_CEX NE_VECTOR2 operator-(NE_COMPONENT scalar, NE_VECTOR2_ARG vector);
-        NE_MATH_INL_CEX NE_VECTOR2 operator-(NE_VECTOR2_ARG vector, NE_COMPONENT scalar);
-        NE_MATH_INL_CEX NE_VECTOR2 operator-(NE_VECTOR2_ARG vectorA, NE_VECTOR2_ARG vectorB);
-
-        NE_MATH_INL_CEX NE_VECTOR2 operator*(NE_COMPONENT scalar, NE_VECTOR2_ARG vector);
-        NE_MATH_INL_CEX NE_VECTOR2 operator*(NE_VECTOR2_ARG vector, NE_COMPONENT scalar);
-        NE_MATH_INL_CEX NE_VECTOR2 operator*(NE_VECTOR2_ARG vectorA, NE_VECTOR2_ARG vectorB);
-
-        NE_MATH_INL_CEX NE_VECTOR2 operator/(NE_COMPONENT scalar, NE_VECTOR2_ARG vector);
-        NE_MATH_INL_CEX NE_VECTOR2 operator/(NE_VECTOR2_ARG vector, NE_COMPONENT scalar);
-        NE_MATH_INL_CEX NE_VECTOR2 operator/(NE_VECTOR2_ARG vectorA, NE_VECTOR2_ARG vectorB);
+        NE_VECTOR_FREE_BINARY_DECL(2, +)
+        NE_VECTOR_FREE_BINARY_DECL(2, -)
+        NE_VECTOR_FREE_BINARY_DECL(2, *)
+        NE_VECTOR_FREE_BINARY_DECL(2, /)
 #endif //NE_VECTORMATH_OP_ARITHMETIC
 
 #ifdef NE_VECTORMATH_OP_MODULO
-        NE_MATH_INL_CEX NE_VECTOR2 operator%(NE_COMPONENT scalar, NE_VECTOR2_ARG vector);
-        NE_MATH_INL_CEX NE_VECTOR2 operator%(NE_VECTOR2_ARG vector, NE_COMPONENT scalar);
-        NE_MATH_INL_CEX NE_VECTOR2 operator%(NE_VECTOR2_ARG vectorA, NE_VECTOR2_ARG vectorB);
+        NE_VECTOR_FREE_BINARY_DECL(2, %)
 #endif //NE_VECTORMATH_OP_MODULO
 
         class NE_VECTOR3
@@ -291,8 +229,9 @@ namespace null
         public:
             union
             {
-                struct { NE_COMPONENT x, y, z; };
-                struct { NE_COMPONENT r, g, b; };
+                [[maybe_unused]] NE_COMPONENT v[3];
+                struct { [[maybe_unused]] NE_COMPONENT x, y, z; };
+                struct { [[maybe_unused]] NE_COMPONENT r, g, b; };
             };
         public:
             NE_MATH_INL_CEX NE_VECTOR3();
@@ -304,112 +243,60 @@ namespace null
             NE_MATH_INL_CEX NE_VECTOR3(NE_VECTOR2_ARG xy, NE_COMPONENT z);
             NE_MATH_INL_CEX NE_VECTOR3(NE_COMPONENT x, NE_VECTOR2_ARG yz);
 
-            NE_MATH_INL_CEX NE_VECTOR3(const NE_VECTOR3& other);
-            NE_MATH_INL_CEX NE_VECTOR3(NE_VECTOR3&& other);
-            NE_MATH_INL_CEX NE_VECTOR3& operator=(const NE_VECTOR3& other);
-            NE_MATH_INL_CEX NE_VECTOR3& operator=(NE_VECTOR3&& other);
+            NE_VECTOR_COPY_SWAP_DECL(3);
 
-            NE_MATH_INL_CEX NE_COMPONENT& operator[](std::size_t idx);
-            NE_MATH_INL_CEX NE_COMPONENT operator[](std::size_t idx) const;
-
+            NE_VECTOR_INDEX_DECL(3)
 #ifdef NE_VECTORMATH_OP_ARITHMETIC
-            NE_MATH_INL_CEX NE_VECTOR3& operator+=(NE_COMPONENT scalar);
-            NE_MATH_INL_CEX NE_VECTOR3& operator+=(NE_VECTOR3_ARG other);
-
-            NE_MATH_INL_CEX NE_VECTOR3& operator-=(NE_COMPONENT scalar);
-            NE_MATH_INL_CEX NE_VECTOR3& operator-=(NE_VECTOR3_ARG other);
-
-            NE_MATH_INL_CEX NE_VECTOR3& operator*=(NE_COMPONENT scalar);
-            NE_MATH_INL_CEX NE_VECTOR3& operator*=(NE_VECTOR3_ARG other);
-
-            NE_MATH_INL_CEX NE_VECTOR3& operator/=(NE_COMPONENT scalar);
-            NE_MATH_INL_CEX NE_VECTOR3& operator/=(NE_VECTOR3_ARG other);
+            NE_VECTOR_ASSIGNMENT_DECL(3, +=)
+            NE_VECTOR_ASSIGNMENT_DECL(3, -=)
+            NE_VECTOR_ASSIGNMENT_DECL(3, *=)
+            NE_VECTOR_ASSIGNMENT_DECL(3, /=)
 #endif //NE_VECTORMATH_OP_ARITHMETIC
 
 #ifdef NE_VECTORMATH_OP_MODULO
-            NE_MATH_INL_CEX NE_VECTOR3 operator%=(NE_COMPONENT scalar);
-            NE_MATH_INL_CEX NE_VECTOR3 operator%=(NE_VECTOR3_ARG other);
+            NE_VECTOR_ASSIGNMENT_DECL(3, %=)
 #endif //NE_VECTORMATH_OP_MODULO
 
 #ifdef NE_VECTORMATH_OP_INC_DEC
-            NE_MATH_INL_CEX NE_VECTOR3& operator++();
-            NE_MATH_INL_CEX NE_VECTOR3 operator++(int);
-            NE_MATH_INL_CEX NE_VECTOR3& operator--();
-            NE_MATH_INL_CEX NE_VECTOR3 operator--(int);
+            NE_VECTOR_INC_DEC_DECL(3, ++)
+            NE_VECTOR_INC_DEC_DECL(3, --)
 #endif //NE_VECTORMATH_OP_INC_DEC
         };
 
 #ifdef NE_VECTORMATH_OP_COMPARISON
-        NE_MATH_INL_CEX Bool3 operator==(NE_COMPONENT scalar, NE_VECTOR3_ARG vector);
-        NE_MATH_INL_CEX Bool3 operator==(NE_VECTOR3_ARG vector, NE_COMPONENT scalar);
-        NE_MATH_INL_CEX Bool3 operator==(NE_VECTOR3_ARG vectorA, NE_VECTOR3_ARG vectorB);
-
-        NE_MATH_INL_CEX Bool3 operator!=(NE_COMPONENT scalar, NE_VECTOR3_ARG vector);
-        NE_MATH_INL_CEX Bool3 operator!=(NE_VECTOR3_ARG vector, NE_COMPONENT scalar);
-        NE_MATH_INL_CEX Bool3 operator!=(NE_VECTOR3_ARG vectorA, NE_VECTOR3_ARG vectorB);
+        NE_VECTOR_FREE_BINARY_COMP_DECL(3, ==)
+        NE_VECTOR_FREE_BINARY_COMP_DECL(3, !=)
 #endif //NE_VECTORMATH_OP_COMPARISON
 
 #ifdef NE_VECTORMATH_OP_LOGICAL
-        NE_MATH_INL_CEX Bool3 operator!(NE_VECTOR3_ARG vector);
+        NE_VECTOR_FREE_UNARY_COMP_DECL(3, !)
 
-        NE_MATH_INL_CEX Bool3 operator&&(NE_COMPONENT scalar, NE_VECTOR3_ARG vector);
-        NE_MATH_INL_CEX Bool3 operator&&(NE_VECTOR3_ARG vector, NE_COMPONENT scalar);
-        NE_MATH_INL_CEX Bool3 operator&&(NE_VECTOR3_ARG vectorA, NE_VECTOR3_ARG vectorB);
-
-        NE_MATH_INL_CEX Bool3 operator||(NE_COMPONENT scalar, NE_VECTOR3_ARG vector);
-        NE_MATH_INL_CEX Bool3 operator||(NE_VECTOR3_ARG vector, NE_COMPONENT scalar);
-        NE_MATH_INL_CEX Bool3 operator||(NE_VECTOR3_ARG vectorA, NE_VECTOR3_ARG vectorB);
+        NE_VECTOR_FREE_BINARY_COMP_DECL(3, &&)
+        NE_VECTOR_FREE_BINARY_COMP_DECL(3, ||)
 #endif //NE_VECTORMATH_OP_LOGICAL
 
 #ifdef NE_VECTORMATH_OP_BITWISE
-        NE_MATH_INL_CEX NE_VECTOR3 operator~(NE_VECTOR3_ARG vector);
+        NE_VECTOR_FREE_UNARY_DECL(3, ~)
 
-        NE_MATH_INL_CEX NE_VECTOR3 operator&(NE_COMPONENT scalar, NE_VECTOR3_ARG vector);
-        NE_MATH_INL_CEX NE_VECTOR3 operator&(NE_VECTOR3_ARG vector, NE_COMPONENT scalar);
-        NE_MATH_INL_CEX NE_VECTOR3 operator&(NE_VECTOR3_ARG vectorA, NE_VECTOR3_ARG vectorB);
-
-        NE_MATH_INL_CEX NE_VECTOR3 operator|(NE_COMPONENT scalar, NE_VECTOR3_ARG vector);
-        NE_MATH_INL_CEX NE_VECTOR3 operator|(NE_VECTOR3_ARG vector, NE_COMPONENT scalar);
-        NE_MATH_INL_CEX NE_VECTOR3 operator|(NE_VECTOR3_ARG vectorA, NE_VECTOR3_ARG vectorB);
-
-        NE_MATH_INL_CEX NE_VECTOR3 operator^(NE_COMPONENT scalar, NE_VECTOR3_ARG vector);
-        NE_MATH_INL_CEX NE_VECTOR3 operator^(NE_VECTOR3_ARG vector, NE_COMPONENT scalar);
-        NE_MATH_INL_CEX NE_VECTOR3 operator^(NE_VECTOR3_ARG vectorA, NE_VECTOR3_ARG vectorB);
-
-        NE_MATH_INL_CEX NE_VECTOR3 operator<<(NE_COMPONENT scalar, NE_VECTOR3_ARG vector);
-        NE_MATH_INL_CEX NE_VECTOR3 operator<<(NE_VECTOR3_ARG vector, NE_COMPONENT scalar);
-        NE_MATH_INL_CEX NE_VECTOR3 operator<<(NE_VECTOR3_ARG vectorA, NE_VECTOR3_ARG vectorB);
-
-        NE_MATH_INL_CEX NE_VECTOR3 operator>>(NE_COMPONENT scalar, NE_VECTOR3_ARG vector);
-        NE_MATH_INL_CEX NE_VECTOR3 operator>>(NE_VECTOR3_ARG vector, NE_COMPONENT scalar);
-        NE_MATH_INL_CEX NE_VECTOR3 operator>>(NE_VECTOR3_ARG vectorA, NE_VECTOR3_ARG vectorB);
+        NE_VECTOR_FREE_BINARY_DECL(3, &)
+        NE_VECTOR_FREE_BINARY_DECL(3, |)
+        NE_VECTOR_FREE_BINARY_DECL(3, ^)
+        NE_VECTOR_FREE_BINARY_DECL(3, <<)
+        NE_VECTOR_FREE_BINARY_DECL(3, >>)
 #endif //NE_VECTORMATH_OP_BITWISE
 
 #ifdef NE_VECTORMATH_OP_ARITHMETIC
-        NE_MATH_INL_CEX NE_VECTOR3 operator+(NE_VECTOR3_ARG vector);
-        NE_MATH_INL_CEX NE_VECTOR3 operator-(NE_VECTOR3_ARG vector);
+        NE_VECTOR_FREE_UNARY_DECL(3, +)
+        NE_VECTOR_FREE_UNARY_DECL(3, -)
 
-        NE_MATH_INL_CEX NE_VECTOR3 operator+(NE_COMPONENT scalar, NE_VECTOR3_ARG vector);
-        NE_MATH_INL_CEX NE_VECTOR3 operator+(NE_VECTOR3_ARG vector, NE_COMPONENT scalar);
-        NE_MATH_INL_CEX NE_VECTOR3 operator+(NE_VECTOR3_ARG vectorA, NE_VECTOR3_ARG vectorB);
-
-        NE_MATH_INL_CEX NE_VECTOR3 operator-(NE_COMPONENT scalar, NE_VECTOR3_ARG vector);
-        NE_MATH_INL_CEX NE_VECTOR3 operator-(NE_VECTOR3_ARG vector, NE_COMPONENT scalar);
-        NE_MATH_INL_CEX NE_VECTOR3 operator-(NE_VECTOR3_ARG vectorA, NE_VECTOR3_ARG vectorB);
-
-        NE_MATH_INL_CEX NE_VECTOR3 operator*(NE_COMPONENT scalar, NE_VECTOR3_ARG vector);
-        NE_MATH_INL_CEX NE_VECTOR3 operator*(NE_VECTOR3_ARG vector, NE_COMPONENT scalar);
-        NE_MATH_INL_CEX NE_VECTOR3 operator*(NE_VECTOR3_ARG vectorA, NE_VECTOR3_ARG vectorB);
-
-        NE_MATH_INL_CEX NE_VECTOR3 operator/(NE_COMPONENT scalar, NE_VECTOR3_ARG vector);
-        NE_MATH_INL_CEX NE_VECTOR3 operator/(NE_VECTOR3_ARG vector, NE_COMPONENT scalar);
-        NE_MATH_INL_CEX NE_VECTOR3 operator/(NE_VECTOR3_ARG vectorA, NE_VECTOR3_ARG vectorB);
+        NE_VECTOR_FREE_BINARY_DECL(3, +)
+        NE_VECTOR_FREE_BINARY_DECL(3, -)
+        NE_VECTOR_FREE_BINARY_DECL(3, *)
+        NE_VECTOR_FREE_BINARY_DECL(3, /)
 #endif //NE_VECTORMATH_OP_ARITHMETIC
 
 #ifdef NE_VECTORMATH_OP_MODULO
-        NE_MATH_INL_CEX NE_VECTOR3 operator%(NE_COMPONENT scalar, NE_VECTOR3_ARG vector);
-        NE_MATH_INL_CEX NE_VECTOR3 operator%(NE_VECTOR3_ARG vector, NE_COMPONENT scalar);
-        NE_MATH_INL_CEX NE_VECTOR3 operator%(NE_VECTOR3_ARG vectorA, NE_VECTOR3_ARG vectorB);
+        NE_VECTOR_FREE_BINARY_DECL(3, %)
 #endif //NE_VECTORMATH_OP_MODULO
 
         class NE_VECTOR4
@@ -417,8 +304,9 @@ namespace null
         public:
             union
             {
-                struct { NE_COMPONENT x, y, z, w; };
-                struct { NE_COMPONENT r, g, b, a; };
+                [[maybe_unused]] NE_COMPONENT v[4];
+                struct { [[maybe_unused]] NE_COMPONENT x, y, z, w; };
+                struct { [[maybe_unused]] NE_COMPONENT r, g, b, a; };
             };
         public:
             NE_MATH_INL_CEX NE_VECTOR4();
@@ -434,112 +322,60 @@ namespace null
             NE_MATH_INL_CEX NE_VECTOR4(NE_VECTOR3_ARG xyz, NE_COMPONENT w);
             NE_MATH_INL_CEX NE_VECTOR4(NE_COMPONENT x, NE_VECTOR3_ARG yzw);
 
-            NE_MATH_INL_CEX NE_VECTOR4(const NE_VECTOR4& other);
-            NE_MATH_INL_CEX NE_VECTOR4(NE_VECTOR4&& other);
-            NE_MATH_INL_CEX NE_VECTOR4& operator=(const NE_VECTOR4& other);
-            NE_MATH_INL_CEX NE_VECTOR4& operator=(NE_VECTOR4&& other);
+            NE_VECTOR_COPY_SWAP_DECL(4);
 
-            NE_MATH_INL_CEX NE_COMPONENT& operator[](std::size_t idx);
-            NE_MATH_INL_CEX NE_COMPONENT operator[](std::size_t idx) const;
-
+            NE_VECTOR_INDEX_DECL(4)
 #ifdef NE_VECTORMATH_OP_ARITHMETIC
-            NE_MATH_INL_CEX NE_VECTOR4& operator+=(NE_COMPONENT scalar);
-            NE_MATH_INL_CEX NE_VECTOR4& operator+=(NE_VECTOR4_ARG other);
-
-            NE_MATH_INL_CEX NE_VECTOR4& operator-=(NE_COMPONENT scalar);
-            NE_MATH_INL_CEX NE_VECTOR4& operator-=(NE_VECTOR4_ARG other);
-
-            NE_MATH_INL_CEX NE_VECTOR4& operator*=(NE_COMPONENT scalar);
-            NE_MATH_INL_CEX NE_VECTOR4& operator*=(NE_VECTOR4_ARG other);
-
-            NE_MATH_INL_CEX NE_VECTOR4& operator/=(NE_COMPONENT scalar);
-            NE_MATH_INL_CEX NE_VECTOR4& operator/=(NE_VECTOR4_ARG other);
+            NE_VECTOR_ASSIGNMENT_DECL(4, +=)
+            NE_VECTOR_ASSIGNMENT_DECL(4, -=)
+            NE_VECTOR_ASSIGNMENT_DECL(4, *=)
+            NE_VECTOR_ASSIGNMENT_DECL(4, /=)
 #endif //NE_VECTORMATH_OP_ARITHMETIC
 
 #ifdef NE_VECTORMATH_OP_MODULO
-            NE_MATH_INL_CEX NE_VECTOR4 operator%=(NE_COMPONENT scalar);
-            NE_MATH_INL_CEX NE_VECTOR4 operator%=(NE_VECTOR4_ARG other);
+            NE_VECTOR_ASSIGNMENT_DECL(4, %=)
 #endif //NE_VECTORMATH_OP_MODULO
 
 #ifdef NE_VECTORMATH_OP_INC_DEC
-            NE_MATH_INL_CEX NE_VECTOR4& operator++();
-            NE_MATH_INL_CEX NE_VECTOR4 operator++(int);
-            NE_MATH_INL_CEX NE_VECTOR4& operator--();
-            NE_MATH_INL_CEX NE_VECTOR4 operator--(int);
+            NE_VECTOR_INC_DEC_DECL(4, ++)
+            NE_VECTOR_INC_DEC_DECL(4, --)
 #endif //NE_VECTORMATH_OP_INC_DEC
         };
 
 #ifdef NE_VECTORMATH_OP_COMPARISON
-        NE_MATH_INL_CEX Bool4 operator==(NE_COMPONENT scalar, NE_VECTOR4_ARG vector);
-        NE_MATH_INL_CEX Bool4 operator==(NE_VECTOR4_ARG vector, NE_COMPONENT scalar);
-        NE_MATH_INL_CEX Bool4 operator==(NE_VECTOR4_ARG vectorA, NE_VECTOR4_ARG vectorB);
-
-        NE_MATH_INL_CEX Bool4 operator!=(NE_COMPONENT scalar, NE_VECTOR4_ARG vector);
-        NE_MATH_INL_CEX Bool4 operator!=(NE_VECTOR4_ARG vector, NE_COMPONENT scalar);
-        NE_MATH_INL_CEX Bool4 operator!=(NE_VECTOR4_ARG vectorA, NE_VECTOR4_ARG vectorB);
+        NE_VECTOR_FREE_BINARY_COMP_DECL(4, ==)
+        NE_VECTOR_FREE_BINARY_COMP_DECL(4, !=)
 #endif //NE_VECTORMATH_OP_COMPARISON
 
 #ifdef NE_VECTORMATH_OP_LOGICAL
-        NE_MATH_INL_CEX Bool4 operator!(NE_VECTOR4_ARG vector);
+        NE_VECTOR_FREE_UNARY_COMP_DECL(4, !)
 
-        NE_MATH_INL_CEX Bool4 operator&&(NE_COMPONENT scalar, NE_VECTOR4_ARG vector);
-        NE_MATH_INL_CEX Bool4 operator&&(NE_VECTOR4_ARG vector, NE_COMPONENT scalar);
-        NE_MATH_INL_CEX Bool4 operator&&(NE_VECTOR4_ARG vectorA, NE_VECTOR4_ARG vectorB);
-
-        NE_MATH_INL_CEX Bool4 operator||(NE_COMPONENT scalar, NE_VECTOR4_ARG vector);
-        NE_MATH_INL_CEX Bool4 operator||(NE_VECTOR4_ARG vector, NE_COMPONENT scalar);
-        NE_MATH_INL_CEX Bool4 operator||(NE_VECTOR4_ARG vectorA, NE_VECTOR4_ARG vectorB);
+        NE_VECTOR_FREE_BINARY_COMP_DECL(4, &&)
+        NE_VECTOR_FREE_BINARY_COMP_DECL(4, ||)
 #endif //NE_VECTORMATH_OP_LOGICAL
 
 #ifdef NE_VECTORMATH_OP_BITWISE
-        NE_MATH_INL_CEX NE_VECTOR4 operator~(NE_VECTOR4_ARG vector);
+        NE_VECTOR_FREE_UNARY_DECL(4, ~)
 
-        NE_MATH_INL_CEX NE_VECTOR4 operator&(NE_COMPONENT scalar, NE_VECTOR4_ARG vector);
-        NE_MATH_INL_CEX NE_VECTOR4 operator&(NE_VECTOR4_ARG vector, NE_COMPONENT scalar);
-        NE_MATH_INL_CEX NE_VECTOR4 operator&(NE_VECTOR4_ARG vectorA, NE_VECTOR4_ARG vectorB);
-
-        NE_MATH_INL_CEX NE_VECTOR4 operator|(NE_COMPONENT scalar, NE_VECTOR4_ARG vector);
-        NE_MATH_INL_CEX NE_VECTOR4 operator|(NE_VECTOR4_ARG vector, NE_COMPONENT scalar);
-        NE_MATH_INL_CEX NE_VECTOR4 operator|(NE_VECTOR4_ARG vectorA, NE_VECTOR4_ARG vectorB);
-
-        NE_MATH_INL_CEX NE_VECTOR4 operator^(NE_COMPONENT scalar, NE_VECTOR4_ARG vector);
-        NE_MATH_INL_CEX NE_VECTOR4 operator^(NE_VECTOR4_ARG vector, NE_COMPONENT scalar);
-        NE_MATH_INL_CEX NE_VECTOR4 operator^(NE_VECTOR4_ARG vectorA, NE_VECTOR4_ARG vectorB);
-
-        NE_MATH_INL_CEX NE_VECTOR4 operator<<(NE_COMPONENT scalar, NE_VECTOR4_ARG vector);
-        NE_MATH_INL_CEX NE_VECTOR4 operator<<(NE_VECTOR4_ARG vector, NE_COMPONENT scalar);
-        NE_MATH_INL_CEX NE_VECTOR4 operator<<(NE_VECTOR4_ARG vectorA, NE_VECTOR4_ARG vectorB);
-
-        NE_MATH_INL_CEX NE_VECTOR4 operator>>(NE_COMPONENT scalar, NE_VECTOR4_ARG vector);
-        NE_MATH_INL_CEX NE_VECTOR4 operator>>(NE_VECTOR4_ARG vector, NE_COMPONENT scalar);
-        NE_MATH_INL_CEX NE_VECTOR4 operator>>(NE_VECTOR4_ARG vectorA, NE_VECTOR4_ARG vectorB);
+        NE_VECTOR_FREE_BINARY_DECL(4, &)
+        NE_VECTOR_FREE_BINARY_DECL(4, |)
+        NE_VECTOR_FREE_BINARY_DECL(4, ^)
+        NE_VECTOR_FREE_BINARY_DECL(4, <<)
+        NE_VECTOR_FREE_BINARY_DECL(4, >>)
 #endif //NE_VECTORMATH_OP_BITWISE
 
 #ifdef NE_VECTORMATH_OP_ARITHMETIC
-        NE_MATH_INL_CEX NE_VECTOR4 operator+(NE_VECTOR4_ARG vector);
-        NE_MATH_INL_CEX NE_VECTOR4 operator-(NE_VECTOR4_ARG vector);
+        NE_VECTOR_FREE_UNARY_DECL(4, +)
+        NE_VECTOR_FREE_UNARY_DECL(4, -)
 
-        NE_MATH_INL_CEX NE_VECTOR4 operator+(NE_COMPONENT scalar, NE_VECTOR4_ARG vector);
-        NE_MATH_INL_CEX NE_VECTOR4 operator+(NE_VECTOR4_ARG vector, NE_COMPONENT scalar);
-        NE_MATH_INL_CEX NE_VECTOR4 operator+(NE_VECTOR4_ARG vectorA, NE_VECTOR4_ARG vectorB);
-
-        NE_MATH_INL_CEX NE_VECTOR4 operator-(NE_COMPONENT scalar, NE_VECTOR4_ARG vector);
-        NE_MATH_INL_CEX NE_VECTOR4 operator-(NE_VECTOR4_ARG vector, NE_COMPONENT scalar);
-        NE_MATH_INL_CEX NE_VECTOR4 operator-(NE_VECTOR4_ARG vectorA, NE_VECTOR4_ARG vectorB);
-
-        NE_MATH_INL_CEX NE_VECTOR4 operator*(NE_COMPONENT scalar, NE_VECTOR4_ARG vector);
-        NE_MATH_INL_CEX NE_VECTOR4 operator*(NE_VECTOR4_ARG vector, NE_COMPONENT scalar);
-        NE_MATH_INL_CEX NE_VECTOR4 operator*(NE_VECTOR4_ARG vectorA, NE_VECTOR4_ARG vectorB);
-
-        NE_MATH_INL_CEX NE_VECTOR4 operator/(NE_COMPONENT scalar, NE_VECTOR4_ARG vector);
-        NE_MATH_INL_CEX NE_VECTOR4 operator/(NE_VECTOR4_ARG vector, NE_COMPONENT scalar);
-        NE_MATH_INL_CEX NE_VECTOR4 operator/(NE_VECTOR4_ARG vectorA, NE_VECTOR4_ARG vectorB);
+        NE_VECTOR_FREE_BINARY_DECL(4, +)
+        NE_VECTOR_FREE_BINARY_DECL(4, -)
+        NE_VECTOR_FREE_BINARY_DECL(4, *)
+        NE_VECTOR_FREE_BINARY_DECL(4, /)
 #endif //NE_VECTORMATH_OP_ARITHMETIC
 
 #ifdef NE_VECTORMATH_OP_MODULO
-        NE_MATH_INL_CEX NE_VECTOR4 operator%(NE_COMPONENT scalar, NE_VECTOR4_ARG vector);
-        NE_MATH_INL_CEX NE_VECTOR4 operator%(NE_VECTOR4_ARG vector, NE_COMPONENT scalar);
-        NE_MATH_INL_CEX NE_VECTOR4 operator%(NE_VECTOR4_ARG vectorA, NE_VECTOR4_ARG vectorB);
+        NE_VECTOR_FREE_BINARY_DECL(4, %)
 #endif //NE_VECTORMATH_OP_MODULO
     } // namespace math
 } // namespace null
@@ -549,6 +385,12 @@ namespace null
 #endif //NE_MATH_INLINE_IMPL
 
 #undef NE_COMPONENT
+
+#undef NE_BOOLN
+#undef NE_BOOLN_ARG
+
+#undef NE_VECTORN
+#undef NE_VECTORN_ARG
 
 #undef NE_VECTOR1
 #undef NE_VECTOR1_ARG
@@ -561,6 +403,15 @@ namespace null
 
 #undef NE_VECTOR4
 #undef NE_VECTOR4_ARG
+
+#undef NE_VECTOR_COPY_SWAP_DECL
+#undef NE_VECTOR_INDEX_DECL
+#undef NE_VECTOR_ASSIGNMENT_DECL
+#undef NE_VECTOR_INC_DEC_DECL
+#undef NE_VECTOR_FREE_UNARY_DECL
+#undef NE_VECTOR_FREE_BINARY_DECL
+#undef NE_VECTOR_FREE_UNARY_COMP_DECL
+#undef NE_VECTOR_FREE_BINARY_COMP_DECL
 
 #undef NE_VECTORMATH_VECTOR_CLASS
 #undef NE_VECTORMATH_VECTOR_TYPE
