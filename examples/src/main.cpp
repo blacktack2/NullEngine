@@ -22,6 +22,7 @@ int main()
     null::math::Float2 f2(2);
     null::math::Float3 f3(3);
     null::math::Float4 f4(4);
+    null::math::FloatQuat fQ(1, 2, 3, 4);
     PrintVec<1, fmtFlt>(f1);
     PrintVec<2, fmtFlt>(f2);
     PrintVec<3, fmtFlt>(f3);
@@ -34,6 +35,7 @@ int main()
     PrintVec<2, fmtFlt>(f2 + f2);
     PrintVec<3, fmtFlt>(f3 + f3);
     PrintVec<4, fmtFlt>(f4 + f4);
+    PrintVec<4, fmtFlt>(fQ);
 
     null::math::Integer1 i1(1);
     null::math::Integer2 i2(2);

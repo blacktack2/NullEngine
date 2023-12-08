@@ -26,15 +26,17 @@ NE_MATH_INL_CEX NE_VECTORN(N)& NE_VECTORN(N)::operator=(NE_VECTORN(N)&& other)  
     return *this;                                                                   \
 }
 
-#define NE_VECTOR_INDEX_IMPL(N)\
-NE_MATH_INL_CEX NE_COMPONENT& NE_VECTORN(N)::operator[](std::size_t idx)      \
-{                                                                             \
-    return v[idx];                                                            \
-}                                                                             \
-NE_MATH_INL_CEX NE_COMPONENT NE_VECTORN(N)::operator[](std::size_t idx) const \
-{                                                                             \
-    return v[idx];                                                            \
+#define NE_INDEX_IMPL(N, Class)                                       \
+NE_MATH_INL_CEX NE_COMPONENT& Class::operator[](std::size_t idx)      \
+{                                                                     \
+    return v[idx];                                                    \
+}                                                                     \
+NE_MATH_INL_CEX NE_COMPONENT Class::operator[](std::size_t idx) const \
+{                                                                     \
+    return v[idx];                                                    \
 }
+
+#define NE_VECTOR_INDEX_IMPL(N) NE_INDEX_IMPL(N, NE_VECTORN(N))
 
 #define NE_VECTOR_ASSIGNMENT_IMPL(N, Op)                                            \
 NE_MATH_INL_CEX NE_VECTORN(N)& NE_VECTORN(N)::operator Op (NE_COMPONENT scalar)     \
@@ -446,11 +448,35 @@ namespace null
 #ifdef NE_VECTORMATH_OP_MODULO
         NE_VECTOR_FREE_BINARY_IMPL(4, %)
 #endif //NE_VECTORMATH_OP_MODULO
+
+#ifdef NE_VECTORMATH_QUATERNION
+        NE_MATH_INL_CEX NE_QUAT::NE_QUAT()
+        {
+        }
+
+        NE_MATH_INL_CEX NE_QUAT::NE_QUAT(NE_COMPONENT scalar)
+            : x(0), y(0), z(0), w(scalar)
+        {
+        }
+
+        NE_MATH_INL_CEX NE_QUAT::NE_QUAT(NE_COMPONENT x, NE_COMPONENT y, NE_COMPONENT z)
+            : x(x), y(y), z(z), w(0)
+        {
+        }
+
+        NE_MATH_INL_CEX NE_QUAT::NE_QUAT(NE_COMPONENT x, NE_COMPONENT y, NE_COMPONENT z, NE_COMPONENT scalar)
+            : x(x), y(y), z(z), w(scalar)
+        {
+        }
+
+        NE_INDEX_IMPL(4, NE_QUAT)
+#endif //NE_VECTORMATH_QUATERNION
     } // namespace math
 } // namespace null
 
 
 #undef NE_VECTOR_COPY_SWAP_IMPL
+#undef NE_INDEX_IMPL
 #undef NE_VECTOR_INDEX_IMPL
 #undef NE_VECTOR_ASSIGNMENT_IMPL
 #undef NE_VECTOR_INC_DEC_IMPL

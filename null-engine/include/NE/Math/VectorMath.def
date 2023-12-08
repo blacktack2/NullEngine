@@ -4,14 +4,16 @@
  * This file uses the following macros (all of which are removed via undef at the end of this file)
  * Required:
  * - NE_VECTORMATH_VECTOR_CLASS(n) - Should append n to the name of the vector class (e.g. Float)
- * - NE_VECTORMATH_VECTOR_TYPE - The actual type of components (e.g. float)
+ * - NE_VECTORMATH_VECTOR_TYPE     - The actual type of components (e.g. float)
+ * Types:
+ * - NE_VECTORMATH_QUATERNION - Create a quaternion type for this component type
  * Optional:
  * - NE_VECTORMATH_OP_COMPARISON - Include the comparison operators (==, !=, >, <, >=, <=)
- * - NE_VECTORMATH_OP_LOGICAL - Include the logical operators (!, &&, ||)
- * - NE_VECTORMATH_OP_BITWISE - Include the bitwise operators (~, &, |, ^, <<, >>)
+ * - NE_VECTORMATH_OP_LOGICAL    - Include the logical operators (!, &&, ||)
+ * - NE_VECTORMATH_OP_BITWISE    - Include the bitwise operators (~, &, |, ^, <<, >>)
  * - NE_VECTORMATH_OP_ARITHMETIC - Include the arithmetic operators (+, -, +n, -n, *, /)
- * - NE_VECTORMATH_OP_MODULO - Include the modulo operator (%)
- * - NE_VECTORMATH_OP_INC_DEC - Include the increment/decrement operators (++, --)
+ * - NE_VECTORMATH_OP_MODULO     - Include the modulo operator (%)
+ * - NE_VECTORMATH_OP_INC_DEC    - Include the increment/decrement operators (++, --)
  */
 
 #if !defined(NE_VECTORMATH_VECTOR_TYPE) || !defined(NE_VECTORMATH_VECTOR_CLASS)
@@ -41,13 +43,16 @@
 #define NE_VECTOR4     NE_VECTORN(4)
 #define NE_VECTOR4_ARG NE_VECTORN_ARG(4)
 
+#define NE_QUAT        NE_CONCAT(NE_VECTORMATH_VECTOR_CLASS, Quat)
+#define NE_QUAT_ARG    NE_CONCAT(NE_QUAT, _arg)
+
 #define NE_VECTOR_COPY_SWAP_DECL(N)                                   \
 NE_MATH_INL_CEX NE_VECTORN(N)(const NE_VECTORN(N)& other);            \
 NE_MATH_INL_CEX NE_VECTORN(N)(NE_VECTORN(N)&& other);                 \
 NE_MATH_INL_CEX NE_VECTORN(N)& operator=(const NE_VECTORN(N)& other); \
 NE_MATH_INL_CEX NE_VECTORN(N)& operator=(NE_VECTORN(N)&& other);
 
-#define NE_VECTOR_INDEX_DECL(N)                            \
+#define NE_VECTOR_INDEX_DECL()                             \
 NE_MATH_INL_CEX NE_COMPONENT& operator[](std::size_t idx); \
 NE_MATH_INL_CEX NE_COMPONENT operator[](std::size_t idx) const;
 
@@ -97,7 +102,7 @@ namespace null
             NE_MATH_INL_CEX NE_VECTOR1& operator=(NE_COMPONENT x);
             NE_MATH_INL_CEX operator NE_COMPONENT() const;
 
-            NE_VECTOR_INDEX_DECL(1)
+            NE_VECTOR_INDEX_DECL()
 #ifdef NE_VECTORMATH_OP_ARITHMETIC
             NE_VECTOR_ASSIGNMENT_DECL(1, +=)
             NE_VECTOR_ASSIGNMENT_DECL(1, -=)
@@ -170,7 +175,7 @@ namespace null
 
             NE_VECTOR_COPY_SWAP_DECL(2);
 
-            NE_VECTOR_INDEX_DECL(2)
+            NE_VECTOR_INDEX_DECL()
 #ifdef NE_VECTORMATH_OP_ARITHMETIC
             NE_VECTOR_ASSIGNMENT_DECL(2, +=)
             NE_VECTOR_ASSIGNMENT_DECL(2, -=)
@@ -245,7 +250,7 @@ namespace null
 
             NE_VECTOR_COPY_SWAP_DECL(3);
 
-            NE_VECTOR_INDEX_DECL(3)
+            NE_VECTOR_INDEX_DECL()
 #ifdef NE_VECTORMATH_OP_ARITHMETIC
             NE_VECTOR_ASSIGNMENT_DECL(3, +=)
             NE_VECTOR_ASSIGNMENT_DECL(3, -=)
@@ -324,7 +329,7 @@ namespace null
 
             NE_VECTOR_COPY_SWAP_DECL(4);
 
-            NE_VECTOR_INDEX_DECL(4)
+            NE_VECTOR_INDEX_DECL()
 #ifdef NE_VECTORMATH_OP_ARITHMETIC
             NE_VECTOR_ASSIGNMENT_DECL(4, +=)
             NE_VECTOR_ASSIGNMENT_DECL(4, -=)
@@ -377,6 +382,34 @@ namespace null
 #ifdef NE_VECTORMATH_OP_MODULO
         NE_VECTOR_FREE_BINARY_DECL(4, %)
 #endif //NE_VECTORMATH_OP_MODULO
+
+#ifdef NE_VECTORMATH_QUATERNION
+        class NE_QUAT
+        {
+        public:
+            union
+            {
+                // Vector part 0-2,xyz,ijk (direction vector)
+                // Scalar part  3 , w , a  (angle)
+                [[maybe_unused]] NE_COMPONENT v[4];
+                struct { [[maybe_unused]] NE_COMPONENT x, y, z, w; };
+                struct { [[maybe_unused]] NE_COMPONENT i, j, k, a; };
+            };
+        public:
+            NE_MATH_INL_CEX NE_QUAT();
+            /**
+             * Construct real quaternion (xyz of 0)
+             */
+            NE_MATH_INL_CEX NE_QUAT(NE_COMPONENT scalar);
+            /**
+             * Construct vector quaternion (w of 0)
+             */
+            NE_MATH_INL_CEX NE_QUAT(NE_COMPONENT x, NE_COMPONENT y, NE_COMPONENT z);
+            NE_MATH_INL_CEX NE_QUAT(NE_COMPONENT x, NE_COMPONENT y, NE_COMPONENT z, NE_COMPONENT scalar);
+
+            NE_VECTOR_INDEX_DECL()
+        };
+#endif //NE_VECTORMATH_QUATERNION
     } // namespace math
 } // namespace null
 
@@ -415,6 +448,8 @@ namespace null
 
 #undef NE_VECTORMATH_VECTOR_CLASS
 #undef NE_VECTORMATH_VECTOR_TYPE
+
+#undef NE_VECTORMATH_QUATERNION
 
 #undef NE_VECTORMATH_OP_COMPARISON
 #undef NE_VECTORMATH_OP_LOGICAL
