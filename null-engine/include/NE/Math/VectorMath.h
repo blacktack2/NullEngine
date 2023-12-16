@@ -1,7 +1,5 @@
 /**
- * Math library loosely based on hlsl types and functionality:
- * - Includes swizzle operators
- * - Operators (+-*\/ etc.) are per-component
+ * Math library loosely based on hlsl types and functionality.
  */
 #ifndef NULLENGINE_VECTOR_H
 #define NULLENGINE_VECTOR_H
@@ -30,7 +28,7 @@
 #define NE_VECTORMATH_OP_COMPARISON
 #define NE_VECTORMATH_OP_LOGICAL
 
-#include "VectorMath.def"
+#include "Vector.def"
 
 // FloatN
 #define NE_VECTORMATH_VECTOR_CLASS Float
@@ -42,7 +40,7 @@
 #define NE_VECTORMATH_OP_LOGICAL
 #define NE_VECTORMATH_OP_ARITHMETIC
 
-#include "VectorMath.def"
+#include "Vector.def"
 
 // IntegerN
 #define NE_VECTORMATH_VECTOR_CLASS Integer
@@ -56,6 +54,6 @@
 #define NE_VECTORMATH_OP_MODULO
 #define NE_VECTORMATH_OP_INC_DEC
 
-#include "VectorMath.def"
+#include "Vector.def"
 
 #endif //NULLENGINE_VECTOR_H

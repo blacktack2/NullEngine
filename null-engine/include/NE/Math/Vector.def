@@ -414,7 +414,7 @@ namespace null
 } // namespace null
 
 #ifdef NE_MATH_INLINE_IMPL
-#include "VectorMath.inl"
+#include "Vector.inl"
 #endif //NE_MATH_INLINE_IMPL
 
 #undef NE_COMPONENT

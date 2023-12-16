@@ -1,5 +1,5 @@
 /**
- * This file follows with the structure and macro definitions specified in VectorMath.def X-Macro definition file.
+ * This file follows with the structure and macro definitions specified in Vector.def X-Macro definition file.
  */
 
 #ifndef NE_MATH_INLINE_IMPL
