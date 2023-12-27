@@ -4,7 +4,7 @@
 #include "NE/System/Window.h"
 
 null::core::Engine::Engine()
-    : m_window(*this), m_device(*this)
+    : m_window(*this), m_device(*this), m_pipelineManager(*this)
 {
 
 }
@@ -30,5 +30,21 @@ bool null::core::Engine::Init()
         return false;
     }
 
+    m_pipelineManager.Init();
+
     return true;
+}
+
+void null::core::Engine::Run()
+{
+    m_isRunning = true;
+    Mainloop();
+}
+
+void null::core::Engine::Mainloop()
+{
+    while (m_isRunning)
+    {
+        m_pipelineManager.Render();
+    }
 }
