@@ -6,6 +6,7 @@
 #include "NE/Rendering/PipelineManager.h"
 
 #include "NE/System/Device.h"
+#include "NE/System/Input.h"
 #include "NE/System/Window.h"
 
 #include <functional>
@@ -19,7 +20,7 @@ namespace null
         class Engine
         {
         public:
-            typedef std::function<void(float dt)> on_update_callback_t;
+            typedef std::function<void()> on_update_callback_t;
         public:
             Engine();
             ~Engine();
@@ -49,6 +50,33 @@ namespace null
 
             void Run();
 
+            system::Window& GetWindow()
+            {
+                return m_window;
+            }
+            const system::Window& GetWindow() const
+            {
+                return m_window;
+            }
+
+            system::Device& GetDevice()
+            {
+                return m_device;
+            }
+            const system::Device& GetDevice() const
+            {
+                return m_device;
+            }
+
+            system::Input& GetInput()
+            {
+                return m_input;
+            }
+            const system::Input& GetInput() const
+            {
+                return m_input;
+            }
+
             std::string_view GetDebugMessage() const
             {
                 return m_debugMessage;
@@ -58,6 +86,7 @@ namespace null
         private:
             system::Window m_window;
             system::Device m_device;
+            system::Input  m_input;
 
             render::PipelineManager m_pipelineManager;
 
