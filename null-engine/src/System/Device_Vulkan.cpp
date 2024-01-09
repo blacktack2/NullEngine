@@ -16,7 +16,10 @@ null::system::Device::Device(core::Engine& engine)
 
 null::system::Device::~Device()
 {
-
+    if (m_deviceData->instance)
+    {
+        vkDestroyInstance(m_deviceData->instance, nullptr);
+    }
 }
 
 bool null::system::Device::Init()
