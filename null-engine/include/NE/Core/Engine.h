@@ -22,7 +22,7 @@ namespace null
         public:
             typedef std::function<void()> on_update_callback_t;
         public:
-            Engine();
+            Engine(const char* applicationName = "Null-Engine Application");
             ~Engine();
 
             void RegisterOnPreUpdate(const on_update_callback_t& onPreUpdate)
@@ -77,6 +77,20 @@ namespace null
                 return m_input;
             }
 
+            render::PipelineManager& GetPipelineManager()
+            {
+                return m_pipelineManager;
+            }
+            const render::PipelineManager& GetPipelineManager() const
+            {
+                return m_pipelineManager;
+            }
+
+            const char* GetApplicationName() const
+            {
+                return m_appName.c_str();
+            }
+
             std::string_view GetDebugMessage() const
             {
                 return m_debugMessage;
@@ -84,6 +98,8 @@ namespace null
         private:
             void Mainloop();
         private:
+            std::string m_appName;
+
             system::Window m_window;
             system::Device m_device;
             system::Input  m_input;

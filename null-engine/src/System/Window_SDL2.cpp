@@ -4,23 +4,6 @@
 
 #include "NE/API/Common_SDL2.h"
 
-null::system::Window::Window(core::Engine& engine)
-    :
-    m_engine(engine),
-    m_windowData(std::make_unique<WindowData>())
-{
-
-}
-
-null::system::Window::~Window()
-{
-    if (m_windowData->window)
-    {
-        SDL_DestroyWindow(m_windowData->window);
-    }
-    SDL_Quit();
-}
-
 bool null::system::Window::Init()
 {
     if (SDL_Init(SDL_INIT_VIDEO) < 0)
@@ -46,6 +29,19 @@ bool null::system::Window::Init()
     SDL_SetWindowMinimumSize(m_windowData->window, m_minWidth, m_minHeight);
     SDL_SetWindowMaximumSize(m_windowData->window, m_maxWidth, m_maxHeight);
 
+    DeviceInit();
+
     return true;
 }
+
+void null::system::Window::Destroy()
+{
+    DeviceDestroy();
+    if (m_windowData->window)
+    {
+        SDL_DestroyWindow(m_windowData->window);
+    }
+    SDL_Quit();
+}
+
 #endif //NE_BUILD_SDL2

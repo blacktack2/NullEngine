@@ -3,8 +3,8 @@
 #include "NE/System/Device.h"
 #include "NE/System/Window.h"
 
-null::core::Engine::Engine()
-    : m_window(*this), m_device(*this), m_input(*this), m_pipelineManager(*this)
+null::core::Engine::Engine(const char* applicationName)
+    : m_appName(applicationName), m_window(*this), m_device(*this), m_input(*this), m_pipelineManager(*this)
 {
 
 }

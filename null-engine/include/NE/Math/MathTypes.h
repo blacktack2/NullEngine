@@ -10,14 +10,15 @@ namespace null
     namespace math
     {
         // Primitive types
-        typedef unsigned char uint8;
-        typedef          char sint8;
-        typedef unsigned short uint16;
-        typedef          short sint16;
-        typedef unsigned int uint32;
-        typedef          int sint32;
-        typedef unsigned long long uint64;
-        typedef          long long sint64;
+        typedef unsigned      char  uint8;
+        typedef               char  sint8;
+        typedef unsigned      short uint16;
+        typedef               short sint16;
+        typedef unsigned      int   uint32;
+        typedef               int   sint32;
+        typedef unsigned long long  uint64;
+        typedef          long long  sint64;
+        typedef unsigned      long  size;
 
 #define NE_VECTORMATH_CLASS_DECL(classname)       class classname; typedef const classname& classname##_arg;
 #define NE_VECTORMATH_CLASS_DECL_NOREF(classname) class classname; typedef classname classname##_arg;

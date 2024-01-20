@@ -43,10 +43,34 @@ namespace null
             {
                 return m_debugMessage;
             }
+
+            WindowData& GetWindowData()
+            {
+                return *m_windowData;
+            }
+            const WindowData& GetWindowData() const
+            {
+                return *m_windowData;
+            }
+            WindowDeviceData& GetWindowDeviceData()
+            {
+                return *m_windowDeviceData;
+            }
+            const WindowDeviceData& GetWindowDeviceData() const
+            {
+                return *m_windowDeviceData;
+            }
+        private:
+            void Destroy();
+
+            // Device-specific extension methods
+            bool DeviceInit();
+            void DeviceDestroy();
         private:
             core::Engine& m_engine;
 
             std::unique_ptr<WindowData> m_windowData;
+            std::unique_ptr<WindowDeviceData> m_windowDeviceData;
 
             math::uint32 m_width  = 100;
             math::uint32 m_height = 100;

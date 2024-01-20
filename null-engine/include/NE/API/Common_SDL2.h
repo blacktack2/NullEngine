@@ -20,6 +20,6 @@ namespace null
     } // namespace system
 } // namespace null
 
-#endif //NULLENGINE_COMMON_SDL2_H
-
 #endif //NE_BUILD_SDL2
+
+#endif //NULLENGINE_COMMON_SDL2_H
