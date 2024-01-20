@@ -53,6 +53,21 @@ bool CheckValidationLayerSupport()
 }
 #endif //NE_DEBUG
 
+bool IsDeviceSuitable(VkPhysicalDevice device)
+{
+    VkPhysicalDeviceProperties deviceProperties;
+    vkGetPhysicalDeviceProperties(device, &deviceProperties);
+
+    VkPhysicalDeviceFeatures deviceFeatures;
+    vkGetPhysicalDeviceFeatures(device, &deviceFeatures);
+
+    bool isSuitable = true;
+
+    // TODO - Implement validation checks
+
+    return isSuitable;
+}
+
 null::system::Device::Device(core::Engine& engine)
     :
     m_engine(engine),
@@ -150,8 +165,8 @@ bool null::system::Device::Init()
     VkDebugUtilsMessengerCreateInfoEXT debugCreateInfo{};
     debugCreateInfo.sType = VK_STRUCTURE_TYPE_DEBUG_UTILS_MESSENGER_CREATE_INFO_EXT;
     debugCreateInfo.messageSeverity =
-            VK_DEBUG_UTILS_MESSAGE_SEVERITY_VERBOSE_BIT_EXT |
-            VK_DEBUG_UTILS_MESSAGE_SEVERITY_INFO_BIT_EXT |
+//            VK_DEBUG_UTILS_MESSAGE_SEVERITY_VERBOSE_BIT_EXT |
+//            VK_DEBUG_UTILS_MESSAGE_SEVERITY_INFO_BIT_EXT |
             VK_DEBUG_UTILS_MESSAGE_SEVERITY_WARNING_BIT_EXT |
             VK_DEBUG_UTILS_MESSAGE_SEVERITY_ERROR_BIT_EXT;
     debugCreateInfo.messageType =
@@ -179,6 +194,35 @@ bool null::system::Device::Init()
         return false;
     }
 #endif //NE_DEBUG
+
+    math::uint32 deviceCount = 0;
+    vkEnumeratePhysicalDevices(m_deviceData->instance, &deviceCount, nullptr);
+
+    if (deviceCount == 0)
+    {
+        m_debugMessage = "Failed to find GPUs with Vulkan support";
+        debug::AssertFail("%s\n", m_debugMessage.c_str());
+        return false;
+    }
+
+    std::vector<VkPhysicalDevice> devices(deviceCount);
+    vkEnumeratePhysicalDevices(m_deviceData->instance, &deviceCount, devices.data());
+
+    for (const VkPhysicalDevice& device : devices)
+    {
+        if (IsDeviceSuitable(device))
+        {
+            m_deviceData->physicalDevice = device;
+            break;
+        }
+    }
+
+    if (m_deviceData->physicalDevice == VK_NULL_HANDLE)
+    {
+        m_debugMessage = "Failed to find a suitable GPU";
+        debug::AssertFail("%s\n", m_debugMessage.c_str());
+        return false;
+    }
 
     return true;
 }

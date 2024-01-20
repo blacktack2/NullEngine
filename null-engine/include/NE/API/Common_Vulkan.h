@@ -14,6 +14,7 @@ namespace null
         struct DeviceData
         {
             VkInstance instance;
+            VkPhysicalDevice physicalDevice = VK_NULL_HANDLE;
 #ifdef NE_DEBUG
             VkDebugUtilsMessengerEXT debugMessenger;
 #endif //NE_DEBUG
