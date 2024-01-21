@@ -2,12 +2,22 @@
 
 #ifdef NE_BUILD_VULKAN
 
+#include "NE/API/Common_Vulkan.h"
+
 #include "NE/Core/Engine.h"
 
-#include "NE/API/Common_Vulkan.h"
+#include "NE/Util/Enum.h"
 
 #include <cstring>
 #include <vector>
+
+NE_ENUM_BITMASK_BEGIN(QueueFamily, null::math::uint32)
+{
+    None           = 0,
+    GraphicsFamily = 1 << 0,
+    Mask           = 0b1
+};
+NE_ENUM_BITMASK_END(QueueFamily, null::math::uint32)
 
 const char constexpr* validationLayers[] =
 {
@@ -53,6 +63,28 @@ bool CheckValidationLayerSupport()
 }
 #endif //NE_DEBUG
 
+QueueFamily GetDeviceQueueFamilies(VkPhysicalDevice device)
+{
+    null::math::uint32 queueFamilyCount = 0;
+    vkGetPhysicalDeviceQueueFamilyProperties(device, &queueFamilyCount, nullptr);
+
+    std::vector<VkQueueFamilyProperties> queueFamilies(queueFamilyCount);
+    vkGetPhysicalDeviceQueueFamilyProperties(device, &queueFamilyCount, queueFamilies.data());
+
+    QueueFamily family = QueueFamily::None;
+
+    for (const VkQueueFamilyProperties& queueFamily : queueFamilies)
+    {
+        switch (queueFamily.queueFlags)
+        {
+            default: break;
+            case VK_QUEUE_GRAPHICS_BIT: family |= QueueFamily::GraphicsFamily;
+        }
+    }
+
+    return family;
+}
+
 bool IsDeviceSuitable(VkPhysicalDevice device)
 {
     VkPhysicalDeviceProperties deviceProperties;
@@ -63,7 +95,7 @@ bool IsDeviceSuitable(VkPhysicalDevice device)
 
     bool isSuitable = true;
 
-    // TODO - Implement validation checks
+    isSuitable |= (GetDeviceQueueFamilies(device) & QueueFamily::Mask) == QueueFamily::Mask;
 
     return isSuitable;
 }
