@@ -127,7 +127,7 @@ null::system::Device::~Device()
     }
 }
 
-bool null::system::Device::Init()
+bool CreateInstance(VkInstance& instance, const char* applicationName, const std::vector<const char*>& requiredExtensions)
 {
     if (!CheckValidationLayerSupport())
     {
@@ -135,45 +135,41 @@ bool null::system::Device::Init()
         return false;
     }
 
-    const WindowDeviceData& windowDeviceData = m_engine.GetWindow().GetWindowDeviceData();
-
     VkResult result;
 
     VkApplicationInfo appInfo;
     appInfo.sType              = VK_STRUCTURE_TYPE_APPLICATION_INFO;
     appInfo.pNext              = nullptr;
-    appInfo.pApplicationName   = m_engine.GetApplicationName();
+    appInfo.pApplicationName   = applicationName;
     appInfo.applicationVersion = VK_MAKE_VERSION(0, 0, 0);
     appInfo.pEngineName        = "Null-Engine";
     appInfo.engineVersion      = VK_MAKE_VERSION(0, 0, 0);
     appInfo.apiVersion         = VK_API_VERSION_1_3;
 
-    math::uint32 extensionCount;
+    null::math::uint32 extensionCount;
     result = vkEnumerateInstanceExtensionProperties(nullptr, &extensionCount, nullptr);
     if (result != VK_SUCCESS)
     {
-        m_debugMessage = "Failed to retrieve extension count from Vulkan";
-        debug::AssertFail("%s\n", m_debugMessage.c_str());
+        null::debug::AssertFail("Failed to retrieve extension count from Vulkan\n");
         return false;
     }
     std::vector<VkExtensionProperties> extensionProperties(extensionCount);
     result = vkEnumerateInstanceExtensionProperties(nullptr, &extensionCount, extensionProperties.data());
     if (result != VK_SUCCESS)
     {
-        m_debugMessage = "Failed to retrieve extension names from Vulkan";
-        debug::AssertFail("%s\n", m_debugMessage.c_str());
+        null::debug::AssertFail("Failed to retrieve extension names from Vulkan\n");
         return false;
     }
 
     std::vector<const char*> extensionNames(extensionCount);
-    for (math::uint32 i = 0; i < extensionCount; ++i)
+    for (null::math::uint32 i = 0; i < extensionCount; ++i)
     {
         extensionNames[i] = extensionProperties[i].extensionName;
     }
 #ifdef NE_DEBUG
     extensionNames.push_back(VK_EXT_DEBUG_UTILS_EXTENSION_NAME);
 #endif //NE_DEBUG
-    extensionNames.insert(extensionNames.end(), windowDeviceData.requiredExtensions.begin(), windowDeviceData.requiredExtensions.end());
+    extensionNames.insert(extensionNames.end(), requiredExtensions.begin(), requiredExtensions.end());
 
     VkInstanceCreateInfo instanceCreateInfo{};
     instanceCreateInfo.sType                   = VK_STRUCTURE_TYPE_INSTANCE_CREATE_INFO;
@@ -185,15 +181,21 @@ bool null::system::Device::Init()
     instanceCreateInfo.enabledExtensionCount   = extensionNames.size();
     instanceCreateInfo.ppEnabledExtensionNames = extensionNames.data();
 
-    result = vkCreateInstance(&instanceCreateInfo, nullptr, &m_deviceData->instance);
+    result = vkCreateInstance(&instanceCreateInfo, nullptr, &instance);
     if (result != VK_SUCCESS)
     {
-        m_debugMessage = "Failed to create Vulkan instance";
-        debug::AssertFail("%s\n", m_debugMessage.c_str());
+        null::debug::AssertFail("Failed to create Vulkan instance\n");
         return false;
     }
 
+    return true;
+}
+
 #ifdef NE_DEBUG
+bool SetupDebugMessenger(VkInstance& instance, VkDebugUtilsMessengerEXT& debugMessenger, void* userData)
+{
+    VkResult result;
+
     VkDebugUtilsMessengerCreateInfoEXT debugCreateInfo{};
     debugCreateInfo.sType = VK_STRUCTURE_TYPE_DEBUG_UTILS_MESSENGER_CREATE_INFO_EXT;
     debugCreateInfo.messageSeverity =
@@ -202,56 +204,87 @@ bool null::system::Device::Init()
             VK_DEBUG_UTILS_MESSAGE_SEVERITY_WARNING_BIT_EXT |
             VK_DEBUG_UTILS_MESSAGE_SEVERITY_ERROR_BIT_EXT;
     debugCreateInfo.messageType =
-        VK_DEBUG_UTILS_MESSAGE_TYPE_GENERAL_BIT_EXT |
-        VK_DEBUG_UTILS_MESSAGE_TYPE_VALIDATION_BIT_EXT |
-        VK_DEBUG_UTILS_MESSAGE_TYPE_PERFORMANCE_BIT_EXT;
-    debugCreateInfo.pfnUserCallback = DebugCallback;
-    debugCreateInfo.pUserData = &m_engine;
+            VK_DEBUG_UTILS_MESSAGE_TYPE_GENERAL_BIT_EXT |
+            VK_DEBUG_UTILS_MESSAGE_TYPE_VALIDATION_BIT_EXT |
+            VK_DEBUG_UTILS_MESSAGE_TYPE_PERFORMANCE_BIT_EXT;
+    debugCreateInfo.pfnUserCallback = null::system::DebugCallback;
+    debugCreateInfo.pUserData = &userData;
 
-    auto debugMessengerCreate = reinterpret_cast<PFN_vkCreateDebugUtilsMessengerEXT>(vkGetInstanceProcAddr(m_deviceData->instance, "vkCreateDebugUtilsMessengerEXT"));
+    auto debugMessengerCreate = reinterpret_cast<PFN_vkCreateDebugUtilsMessengerEXT>(vkGetInstanceProcAddr(instance, "vkCreateDebugUtilsMessengerEXT"));
     if (debugMessengerCreate)
     {
-        result = debugMessengerCreate(m_deviceData->instance, &debugCreateInfo, nullptr, &m_deviceData->debugMessenger);
+        result = debugMessengerCreate(instance, &debugCreateInfo, nullptr, &debugMessenger);
         if (result != VK_SUCCESS)
         {
-            m_debugMessage = "Failed to assign Vulkan debug callback";
-            debug::AssertFail("%s\n", m_debugMessage.c_str());
+            null::debug::AssertFail("Failed to assign Vulkan debug callback\n");
             return false;
         }
     }
     else
     {
-        m_debugMessage = "Missing extension for Vulkan debug callback";
-        debug::AssertFail("%s\n", m_debugMessage.c_str());
+        null::debug::AssertFail("Missing extension for Vulkan debug callback\n");
         return false;
     }
+
+    return true;
+}
 #endif //NE_DEBUG
 
-    math::uint32 deviceCount = 0;
-    vkEnumeratePhysicalDevices(m_deviceData->instance, &deviceCount, nullptr);
+bool SelectPhysicalDevice(VkInstance& instance, VkPhysicalDevice& physicalDevice)
+{
+    null::math::uint32 deviceCount = 0;
+    vkEnumeratePhysicalDevices(instance, &deviceCount, nullptr);
 
     if (deviceCount == 0)
     {
-        m_debugMessage = "Failed to find GPUs with Vulkan support";
-        debug::AssertFail("%s\n", m_debugMessage.c_str());
+        null::debug::AssertFail("Failed to find GPUs with Vulkan support\n");
         return false;
     }
 
     std::vector<VkPhysicalDevice> devices(deviceCount);
-    vkEnumeratePhysicalDevices(m_deviceData->instance, &deviceCount, devices.data());
+    vkEnumeratePhysicalDevices(instance, &deviceCount, devices.data());
 
     for (const VkPhysicalDevice& device : devices)
     {
         if (IsDeviceSuitable(device))
         {
-            m_deviceData->physicalDevice = device;
+            physicalDevice = device;
             break;
         }
     }
 
-    if (m_deviceData->physicalDevice == VK_NULL_HANDLE)
+    if (physicalDevice == VK_NULL_HANDLE)
     {
-        m_debugMessage = "Failed to find a suitable GPU";
+        null::debug::AssertFail("Failed to find a suitable GPU\n");
+        return false;
+    }
+
+    return true;
+}
+
+bool null::system::Device::Init()
+{
+    const WindowDeviceData& windowDeviceData = m_engine.GetWindow().GetWindowDeviceData();
+
+    if (!CreateInstance(m_deviceData->instance, m_engine.GetApplicationName(), windowDeviceData.requiredExtensions))
+    {
+        m_debugMessage = "Failed to create Vulkan instance";
+        debug::AssertFail("%s\n", m_debugMessage.c_str());
+        return false;
+    }
+
+#ifdef NE_DEBUG
+    if (!SetupDebugMessenger(m_deviceData->instance, m_deviceData->debugMessenger, &m_engine))
+    {
+        m_debugMessage = "Failed to setup debug messenger";
+        debug::AssertFail("%s\n", m_debugMessage.c_str());
+        return false;
+    }
+#endif //NE_DEBUG
+
+    if (!SelectPhysicalDevice(m_deviceData->instance, m_deviceData->physicalDevice))
+    {
+        m_debugMessage = "Failed to select physical device";
         debug::AssertFail("%s\n", m_debugMessage.c_str());
         return false;
     }
