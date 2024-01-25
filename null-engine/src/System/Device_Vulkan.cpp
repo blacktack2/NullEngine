@@ -8,16 +8,34 @@
 
 #include "NE/Util/Enum.h"
 
+#include <array>
 #include <cstring>
+#include <optional>
 #include <vector>
 
-NE_ENUM_BITMASK_BEGIN(QueueFamily, null::math::uint32)
+NE_ENUM_ENUMERATOR_BEGIN(QueueFamily, null::math::uint32)
 {
-    None           = 0,
-    GraphicsFamily = 1 << 0,
-    Mask           = 0b1
+    GraphicsFamily = 0,
+    _Max
 };
-NE_ENUM_BITMASK_END(QueueFamily, null::math::uint32)
+NE_ENUM_ENUMERATOR_END(QueueFamily, null::math::uint32)
+
+struct QueueFamilySet
+{
+    std::array<std::optional<null::math::uint32>, (null::math::size)QueueFamily::_Max> queueFamilies;
+
+    bool IsValid()
+    {
+        for (const auto& queueFamily : queueFamilies)
+        {
+            if (!queueFamily.has_value())
+            {
+                return false;
+            }
+        }
+        return true;
+    }
+};
 
 const char constexpr* validationLayers[] =
 {
@@ -63,7 +81,7 @@ bool CheckValidationLayerSupport()
 }
 #endif //NE_DEBUG
 
-QueueFamily GetDeviceQueueFamilies(VkPhysicalDevice device)
+QueueFamilySet GetDeviceQueueFamilies(VkPhysicalDevice device)
 {
     null::math::uint32 queueFamilyCount = 0;
     vkGetPhysicalDeviceQueueFamilyProperties(device, &queueFamilyCount, nullptr);
@@ -71,18 +89,18 @@ QueueFamily GetDeviceQueueFamilies(VkPhysicalDevice device)
     std::vector<VkQueueFamilyProperties> queueFamilies(queueFamilyCount);
     vkGetPhysicalDeviceQueueFamilyProperties(device, &queueFamilyCount, queueFamilies.data());
 
-    QueueFamily family = QueueFamily::None;
+    QueueFamilySet queueFamilySet;
 
-    for (const VkQueueFamilyProperties& queueFamily : queueFamilies)
+    for (null::math::size i = 0; i < queueFamilyCount; ++i)
     {
-        switch (queueFamily.queueFlags)
+        const VkQueueFamilyProperties& queueFamily = queueFamilies[i];
+        if (queueFamily.queueFlags & VK_QUEUE_GRAPHICS_BIT)
         {
-            default: break;
-            case VK_QUEUE_GRAPHICS_BIT: family |= QueueFamily::GraphicsFamily;
+            queueFamilySet.queueFamilies[(null::math::size)QueueFamily::GraphicsFamily] = i;
         }
     }
 
-    return family;
+    return queueFamilySet;
 }
 
 bool IsDeviceSuitable(VkPhysicalDevice device)
@@ -94,8 +112,6 @@ bool IsDeviceSuitable(VkPhysicalDevice device)
     vkGetPhysicalDeviceFeatures(device, &deviceFeatures);
 
     bool isSuitable = true;
-
-    isSuitable |= (GetDeviceQueueFamilies(device) & QueueFamily::Mask) == QueueFamily::Mask;
 
     return isSuitable;
 }
@@ -123,6 +139,7 @@ null::system::Device::~Device()
 #endif //NE_DEBUG
     if (m_deviceData->instance)
     {
+        vkDestroyDevice(m_deviceData->device, nullptr);
         vkDestroyInstance(m_deviceData->instance, nullptr);
     }
 }
@@ -262,6 +279,35 @@ bool SelectPhysicalDevice(VkInstance& instance, VkPhysicalDevice& physicalDevice
     return true;
 }
 
+bool CreateLogicalDevice(VkInstance& instance, VkPhysicalDevice& physicalDevice, VkDevice& device, QueueFamilySet& queueFamilySet)
+{
+    VkResult result;
+
+    float queuePriority = 1.0f;
+    VkDeviceQueueCreateInfo queueCreateInfo{};
+    queueCreateInfo.sType = VK_STRUCTURE_TYPE_DEVICE_QUEUE_CREATE_INFO;
+    queueCreateInfo.queueFamilyIndex = queueFamilySet.queueFamilies[(null::math::size)QueueFamily::GraphicsFamily].value();
+    queueCreateInfo.queueCount = 1;
+    queueCreateInfo.pQueuePriorities = &queuePriority;
+
+    VkPhysicalDeviceFeatures deviceFeatures{};
+
+    VkDeviceCreateInfo createInfo{};
+    createInfo.sType = VK_STRUCTURE_TYPE_DEVICE_CREATE_INFO;
+    createInfo.pQueueCreateInfos = &queueCreateInfo;
+    createInfo.queueCreateInfoCount = 1;
+    createInfo.pEnabledFeatures = &deviceFeatures;
+
+    result = vkCreateDevice(physicalDevice, &createInfo, nullptr, &device);
+    if (result != VK_SUCCESS)
+    {
+        null::debug::AssertFail("Failed to create logical device\n");
+        return false;
+    }
+
+    return true;
+}
+
 bool null::system::Device::Init()
 {
     const WindowDeviceData& windowDeviceData = m_engine.GetWindow().GetWindowDeviceData();
@@ -288,6 +334,23 @@ bool null::system::Device::Init()
         debug::AssertFail("%s\n", m_debugMessage.c_str());
         return false;
     }
+
+    QueueFamilySet queueFamilySet = GetDeviceQueueFamilies(m_deviceData->physicalDevice);
+    if (!queueFamilySet.IsValid())
+    {
+        m_debugMessage = "Missing required queue families";
+        debug::AssertFail("%s\n", m_debugMessage.c_str());
+        return false;
+    }
+
+    if (!CreateLogicalDevice(m_deviceData->instance, m_deviceData->physicalDevice, m_deviceData->device, queueFamilySet))
+    {
+        m_debugMessage = "Failed to create logical device";
+        debug::AssertFail("%s\n", m_debugMessage.c_str());
+        return false;
+    }
+
+    vkGetDeviceQueue(m_deviceData->device, queueFamilySet.queueFamilies[(null::math::size)QueueFamily::GraphicsFamily].value(), 0, &m_deviceData->graphicsQueue);
 
     return true;
 }
