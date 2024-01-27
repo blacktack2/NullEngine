@@ -16,6 +16,7 @@
 NE_ENUM_ENUMERATOR_BEGIN(QueueFamily, null::math::uint32)
 {
     GraphicsFamily = 0,
+    PresentationFamily,
     _Max
 };
 NE_ENUM_ENUMERATOR_END(QueueFamily, null::math::uint32)
@@ -81,7 +82,7 @@ bool CheckValidationLayerSupport()
 }
 #endif //NE_DEBUG
 
-QueueFamilySet GetDeviceQueueFamilies(VkPhysicalDevice device)
+QueueFamilySet GetDeviceQueueFamilies(VkPhysicalDevice& device, VkSurfaceKHR& surface)
 {
     null::math::uint32 queueFamilyCount = 0;
     vkGetPhysicalDeviceQueueFamilyProperties(device, &queueFamilyCount, nullptr);
@@ -97,6 +98,12 @@ QueueFamilySet GetDeviceQueueFamilies(VkPhysicalDevice device)
         if (queueFamily.queueFlags & VK_QUEUE_GRAPHICS_BIT)
         {
             queueFamilySet.queueFamilies[(null::math::size)QueueFamily::GraphicsFamily] = i;
+        }
+        VkBool32 presentSupport = false;
+        vkGetPhysicalDeviceSurfaceSupportKHR(device, i, surface, &presentSupport);
+        if (presentSupport)
+        {
+            queueFamilySet.queueFamilies[(null::math::size)QueueFamily::PresentationFamily] = i;
         }
     }
 
@@ -114,34 +121,6 @@ bool IsDeviceSuitable(VkPhysicalDevice device)
     bool isSuitable = true;
 
     return isSuitable;
-}
-
-null::system::Device::Device(core::Engine& engine)
-    :
-    m_engine(engine),
-    m_deviceData(std::make_unique<DeviceData>())
-{
-
-}
-
-null::system::Device::~Device()
-{
-#ifdef NE_DEBUG
-    auto debugMessengerDestroy = reinterpret_cast<PFN_vkDestroyDebugUtilsMessengerEXT>(vkGetInstanceProcAddr(m_deviceData->instance, "vkDestroyDebugUtilsMessengerEXT"));
-    if (debugMessengerDestroy)
-    {
-        debugMessengerDestroy(m_deviceData->instance, m_deviceData->debugMessenger, nullptr);
-    }
-    else
-    {
-        debug::AssertFail("Unable to safely destroy Vulkan debug messenger\n");
-    }
-#endif //NE_DEBUG
-    if (m_deviceData->instance)
-    {
-        vkDestroyDevice(m_deviceData->device, nullptr);
-        vkDestroyInstance(m_deviceData->instance, nullptr);
-    }
 }
 
 bool CreateInstance(VkInstance& instance, const char* applicationName, const std::vector<const char*>& requiredExtensions)
@@ -283,20 +262,26 @@ bool CreateLogicalDevice(VkInstance& instance, VkPhysicalDevice& physicalDevice,
 {
     VkResult result;
 
+    std::vector<VkDeviceQueueCreateInfo> queueCreateInfos;
+
     float queuePriority = 1.0f;
-    VkDeviceQueueCreateInfo queueCreateInfo{};
-    queueCreateInfo.sType = VK_STRUCTURE_TYPE_DEVICE_QUEUE_CREATE_INFO;
-    queueCreateInfo.queueFamilyIndex = queueFamilySet.queueFamilies[(null::math::size)QueueFamily::GraphicsFamily].value();
-    queueCreateInfo.queueCount = 1;
-    queueCreateInfo.pQueuePriorities = &queuePriority;
+    for (std::optional<null::math::uint32> queueFamily : queueFamilySet.queueFamilies)
+    {
+        VkDeviceQueueCreateInfo queueCreateInfo{};
+        queueCreateInfo.sType            = VK_STRUCTURE_TYPE_DEVICE_QUEUE_CREATE_INFO;
+        queueCreateInfo.queueFamilyIndex = queueFamily.value();
+        queueCreateInfo.queueCount       = 1;
+        queueCreateInfo.pQueuePriorities = &queuePriority;
+        queueCreateInfos.push_back(queueCreateInfo);
+    }
 
     VkPhysicalDeviceFeatures deviceFeatures{};
 
     VkDeviceCreateInfo createInfo{};
-    createInfo.sType = VK_STRUCTURE_TYPE_DEVICE_CREATE_INFO;
-    createInfo.pQueueCreateInfos = &queueCreateInfo;
-    createInfo.queueCreateInfoCount = 1;
-    createInfo.pEnabledFeatures = &deviceFeatures;
+    createInfo.sType                = VK_STRUCTURE_TYPE_DEVICE_CREATE_INFO;
+    createInfo.pQueueCreateInfos    = queueCreateInfos.data();
+    createInfo.queueCreateInfoCount = queueCreateInfos.size();
+    createInfo.pEnabledFeatures     = &deviceFeatures;
 
     result = vkCreateDevice(physicalDevice, &createInfo, nullptr, &device);
     if (result != VK_SUCCESS)
@@ -328,6 +313,11 @@ bool null::system::Device::Init()
     }
 #endif //NE_DEBUG
 
+    if (!WindowInit())
+    {
+        return false;
+    }
+
     if (!SelectPhysicalDevice(m_deviceData->instance, m_deviceData->physicalDevice))
     {
         m_debugMessage = "Failed to select physical device";
@@ -335,7 +325,7 @@ bool null::system::Device::Init()
         return false;
     }
 
-    QueueFamilySet queueFamilySet = GetDeviceQueueFamilies(m_deviceData->physicalDevice);
+    QueueFamilySet queueFamilySet = GetDeviceQueueFamilies(m_deviceData->physicalDevice, m_deviceData->surface);
     if (!queueFamilySet.IsValid())
     {
         m_debugMessage = "Missing required queue families";
@@ -350,9 +340,40 @@ bool null::system::Device::Init()
         return false;
     }
 
-    vkGetDeviceQueue(m_deviceData->device, queueFamilySet.queueFamilies[(null::math::size)QueueFamily::GraphicsFamily].value(), 0, &m_deviceData->graphicsQueue);
+    vkGetDeviceQueue(
+        m_deviceData->device,
+        queueFamilySet.queueFamilies[(null::math::size)QueueFamily::GraphicsFamily].value(),
+        0,
+        &m_deviceData->graphicsQueue
+    );
+    vkGetDeviceQueue(
+        m_deviceData->device,
+        queueFamilySet.queueFamilies[(null::math::size)QueueFamily::PresentationFamily].value(),
+        0,
+        &m_deviceData->presentQueue
+    );
 
     return true;
+}
+
+void null::system::Device::Destroy()
+{
+#ifdef NE_DEBUG
+    auto debugMessengerDestroy = reinterpret_cast<PFN_vkDestroyDebugUtilsMessengerEXT>(vkGetInstanceProcAddr(m_deviceData->instance, "vkDestroyDebugUtilsMessengerEXT"));
+    if (debugMessengerDestroy)
+    {
+        debugMessengerDestroy(m_deviceData->instance, m_deviceData->debugMessenger, nullptr);
+    }
+    else
+    {
+        debug::AssertFail("Unable to safely destroy Vulkan debug messenger\n");
+    }
+#endif //NE_DEBUG
+    if (m_deviceData->instance)
+    {
+        vkDestroyDevice(m_deviceData->device, nullptr);
+        vkDestroyInstance(m_deviceData->instance, nullptr);
+    }
 }
 
 #endif //NE_BUILD_VULKAN

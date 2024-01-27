@@ -16,7 +16,9 @@ namespace null
             VkInstance       instance;
             VkPhysicalDevice physicalDevice = VK_NULL_HANDLE;
             VkDevice         device;
+            VkSurfaceKHR     surface;
             VkQueue          graphicsQueue;
+            VkQueue          presentQueue;
 #ifdef NE_DEBUG
             VkDebugUtilsMessengerEXT debugMessenger;
 #endif //NE_DEBUG
@@ -66,7 +68,7 @@ namespace null
             }
             else
             {
-                null::debug::AssertFail("Vulkan error: severity=%s | type=%s | message=%s",
+                null::debug::AssertFail("Vulkan error: severity=%s | type=%s | message=%s\n",
                                         null::system::VulkanDebugSeverityToString(messageSeverity),
                                         null::system::VulkanDebugTypeToString(messageType),
                                         callbackData->pMessage

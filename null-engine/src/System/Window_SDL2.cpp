@@ -14,8 +14,8 @@ bool null::system::Window::Init()
     }
 
     SDL_WindowFlags windowFlags = (SDL_WindowFlags)(
-            SDL_WINDOW_VULKAN    |
-            SDL_WINDOW_RESIZABLE |
+            GetWindowFlagsForDevice() |
+            SDL_WINDOW_RESIZABLE      |
             SDL_WINDOW_ALLOW_HIGHDPI
             );
     m_windowData->window = SDL_CreateWindow(m_title.c_str(), SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, m_width, m_height, windowFlags);

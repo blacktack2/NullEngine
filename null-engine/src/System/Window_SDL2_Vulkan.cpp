@@ -48,4 +48,9 @@ void null::system::Window::DeviceDestroy()
 
 }
 
+SDL_WindowFlags null::system::GetWindowFlagsForDevice()
+{
+    return SDL_WINDOW_VULKAN;
+}
+
 #endif //defined(NE_BUILD_SDL2) && defined(NE_BUILD_VULKAN)

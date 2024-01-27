@@ -33,6 +33,10 @@ namespace null
                 return m_debugMessage;
             }
         private:
+            void Destroy();
+
+            bool WindowInit();
+        private:
             core::Engine& m_engine;
 
             std::unique_ptr<DeviceData> m_deviceData;

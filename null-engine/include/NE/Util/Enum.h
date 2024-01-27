@@ -1,6 +1,11 @@
 #ifndef NULLENGINE_ENUM_H
 #define NULLENGINE_ENUM_H
 
+#define NE_ENUM_ENUMERATOR_BEGIN(enumType, dataType) \
+enum class enumType : dataType
+
+#define NE_ENUM_ENUMERATOR_END(enumType, dataType)
+
 #define NE_ENUM_BITMASK_BEGIN(enumType, dataType) \
 enum class enumType : dataType
 
