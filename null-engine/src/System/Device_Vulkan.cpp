@@ -38,11 +38,23 @@ struct QueueFamilySet
     }
 };
 
+struct SwapChainSupportData
+{
+    VkSurfaceCapabilitiesKHR capabilities;
+    std::vector<VkSurfaceFormatKHR> formats;
+    std::vector<VkPresentModeKHR> presentModes;
+};
+
 const char constexpr* validationLayers[] =
 {
 #ifdef NE_DEBUG
     "VK_LAYER_KHRONOS_validation"
 #endif //NE_DEBUG
+};
+
+
+const char constexpr* requiredDeviceExtensions[] = {
+    VK_KHR_SWAPCHAIN_EXTENSION_NAME,
 };
 
 bool CheckValidationLayerSupport()
@@ -82,13 +94,13 @@ bool CheckValidationLayerSupport()
 }
 #endif //NE_DEBUG
 
-QueueFamilySet GetDeviceQueueFamilies(VkPhysicalDevice& device, VkSurfaceKHR& surface)
+QueueFamilySet GetDeviceQueueFamilies(null::system::DeviceData& deviceData)
 {
     null::math::uint32 queueFamilyCount = 0;
-    vkGetPhysicalDeviceQueueFamilyProperties(device, &queueFamilyCount, nullptr);
+    vkGetPhysicalDeviceQueueFamilyProperties(deviceData.physicalDevice, &queueFamilyCount, nullptr);
 
     std::vector<VkQueueFamilyProperties> queueFamilies(queueFamilyCount);
-    vkGetPhysicalDeviceQueueFamilyProperties(device, &queueFamilyCount, queueFamilies.data());
+    vkGetPhysicalDeviceQueueFamilyProperties(deviceData.physicalDevice, &queueFamilyCount, queueFamilies.data());
 
     QueueFamilySet queueFamilySet;
 
@@ -100,7 +112,7 @@ QueueFamilySet GetDeviceQueueFamilies(VkPhysicalDevice& device, VkSurfaceKHR& su
             queueFamilySet.queueFamilies[(null::math::size)QueueFamily::GraphicsFamily] = i;
         }
         VkBool32 presentSupport = false;
-        vkGetPhysicalDeviceSurfaceSupportKHR(device, i, surface, &presentSupport);
+        vkGetPhysicalDeviceSurfaceSupportKHR(deviceData.physicalDevice, i, deviceData.surface, &presentSupport);
         if (presentSupport)
         {
             queueFamilySet.queueFamilies[(null::math::size)QueueFamily::PresentationFamily] = i;
@@ -110,37 +122,34 @@ QueueFamilySet GetDeviceQueueFamilies(VkPhysicalDevice& device, VkSurfaceKHR& su
     return queueFamilySet;
 }
 
-bool IsDeviceSuitable(VkPhysicalDevice device)
+SwapChainSupportData GetSwapChainSupport(null::system::DeviceData& deviceData)
 {
-    VkPhysicalDeviceProperties deviceProperties;
-    vkGetPhysicalDeviceProperties(device, &deviceProperties);
+    SwapChainSupportData data;
 
-    VkPhysicalDeviceFeatures deviceFeatures;
-    vkGetPhysicalDeviceFeatures(device, &deviceFeatures);
+    vkGetPhysicalDeviceSurfaceCapabilitiesKHR(deviceData.physicalDevice, deviceData.surface, &data.capabilities);
 
-    bool isSuitable = true;
-
-    return isSuitable;
-}
-
-bool CreateInstance(VkInstance& instance, const char* applicationName, const std::vector<const char*>& requiredExtensions)
-{
-    if (!CheckValidationLayerSupport())
+    null::math::uint32 formatCount;
+    vkGetPhysicalDeviceSurfaceFormatsKHR(deviceData.physicalDevice, deviceData.surface, &formatCount, nullptr);
+    if (formatCount > 0)
     {
-        null::debug::AssertFail("Required validation layer is not available.");
-        return false;
+        data.formats.resize(formatCount);
+        vkGetPhysicalDeviceSurfaceFormatsKHR(deviceData.physicalDevice, deviceData.surface, &formatCount, data.formats.data());
     }
 
-    VkResult result;
+    null::math::uint32 presentModeCount;
+    vkGetPhysicalDeviceSurfacePresentModesKHR(deviceData.physicalDevice, deviceData.surface, &presentModeCount, nullptr);
+    if (formatCount > 0)
+    {
+        data.presentModes.resize(formatCount);
+        vkGetPhysicalDeviceSurfacePresentModesKHR(deviceData.physicalDevice, deviceData.surface, &presentModeCount, data.presentModes.data());
+    }
 
-    VkApplicationInfo appInfo;
-    appInfo.sType              = VK_STRUCTURE_TYPE_APPLICATION_INFO;
-    appInfo.pNext              = nullptr;
-    appInfo.pApplicationName   = applicationName;
-    appInfo.applicationVersion = VK_MAKE_VERSION(0, 0, 0);
-    appInfo.pEngineName        = "Null-Engine";
-    appInfo.engineVersion      = VK_MAKE_VERSION(0, 0, 0);
-    appInfo.apiVersion         = VK_API_VERSION_1_3;
+    return data;
+}
+
+bool GetInstanceExtensions(std::vector<std::string>& extensions)
+{
+    VkResult result;
 
     null::math::uint32 extensionCount;
     result = vkEnumerateInstanceExtensionProperties(nullptr, &extensionCount, nullptr);
@@ -157,16 +166,119 @@ bool CreateInstance(VkInstance& instance, const char* applicationName, const std
         return false;
     }
 
-    std::vector<const char*> extensionNames(extensionCount);
+    extensions = std::vector<std::string>(extensionCount);
     for (null::math::uint32 i = 0; i < extensionCount; ++i)
     {
-        extensionNames[i] = extensionProperties[i].extensionName;
+        extensions[i] = extensionProperties[i].extensionName;
     }
 #ifdef NE_DEBUG
-    extensionNames.push_back(VK_EXT_DEBUG_UTILS_EXTENSION_NAME);
+    extensions.push_back(VK_EXT_DEBUG_UTILS_EXTENSION_NAME);
 #endif //NE_DEBUG
-    extensionNames.insert(extensionNames.end(), requiredExtensions.begin(), requiredExtensions.end());
 
+    return true;
+}
+
+bool GetDeviceExtensions(VkPhysicalDevice& physicalDevice, std::vector<std::string>& extensions)
+{
+    VkResult result;
+
+    extensions.clear();
+
+    null::math::uint32 extensionCount;
+    result = vkEnumerateDeviceExtensionProperties(physicalDevice, nullptr, &extensionCount, nullptr);
+    if (result != VK_SUCCESS)
+    {
+        null::debug::AssertFail("Failed to retrieve available extension count\n");
+        return false;
+    }
+
+    std::vector<VkExtensionProperties> extensionProperties(extensionCount);
+    result = vkEnumerateDeviceExtensionProperties(physicalDevice, nullptr, &extensionCount, extensionProperties.data());
+    if (result != VK_SUCCESS)
+    {
+        null::debug::AssertFail("Failed to retrieve available extensions\n");
+        return false;
+    }
+
+    for (null::math::size i = 0; i < extensionCount; ++i)
+    {
+        extensions.push_back(extensionProperties[i].extensionName);
+    }
+
+    return true;
+}
+
+bool AreExtensionsSupported(const std::vector<std::string>& deviceExtensions)
+{
+    for (std::string_view requiredExt : requiredDeviceExtensions)
+    {
+        bool isAvailable = false;
+        for (std::string_view deviceExt : deviceExtensions)
+        {
+            if (requiredExt == deviceExt)
+            {
+                isAvailable = true;
+                break;
+            }
+        }
+        if (!isAvailable)
+        {
+            null::debug::AssertFail("Vulkan extension [%s] not supported by device\n", requiredExt);
+            return false;
+        }
+    }
+
+    return true;
+}
+
+bool IsDeviceSuitable(null::system::DeviceData& deviceData, const std::vector<std::string>& deviceExtensions)
+{
+    VkPhysicalDeviceProperties deviceProperties;
+    vkGetPhysicalDeviceProperties(deviceData.physicalDevice, &deviceProperties);
+
+    VkPhysicalDeviceFeatures deviceFeatures;
+    vkGetPhysicalDeviceFeatures(deviceData.physicalDevice, &deviceFeatures);
+
+    if (!AreExtensionsSupported(deviceExtensions))
+    {
+        null::debug::AssertFail("Logical device extensions not supported.\n");
+        return false;
+    }
+
+    SwapChainSupportData swapChainSupport = GetSwapChainSupport(deviceData);
+    if (swapChainSupport.formats.empty() || swapChainSupport.presentModes.empty())
+    {
+        null::debug::AssertFail("Swap-chain not supported.\n");
+        return false;
+    }
+
+    return true;
+}
+
+bool CreateInstance(null::system::DeviceData& deviceData, const char* applicationName, const std::vector<std::string>& instanceExtensions)
+{
+    if (!CheckValidationLayerSupport())
+    {
+        null::debug::AssertFail("Required validation layer is not available.\n");
+        return false;
+    }
+
+    VkResult result;
+
+    VkApplicationInfo appInfo;
+    appInfo.sType              = VK_STRUCTURE_TYPE_APPLICATION_INFO;
+    appInfo.pNext              = nullptr;
+    appInfo.pApplicationName   = applicationName;
+    appInfo.applicationVersion = VK_MAKE_VERSION(0, 0, 0);
+    appInfo.pEngineName        = "Null-Engine";
+    appInfo.engineVersion      = VK_MAKE_VERSION(0, 0, 0);
+    appInfo.apiVersion         = VK_API_VERSION_1_3;
+
+    std::vector<const char*> extensions(instanceExtensions.size());
+    for (null::math::size i = 0; i < instanceExtensions.size(); ++i)
+    {
+        extensions[i] = instanceExtensions[i].c_str();
+    }
     VkInstanceCreateInfo instanceCreateInfo{};
     instanceCreateInfo.sType                   = VK_STRUCTURE_TYPE_INSTANCE_CREATE_INFO;
     instanceCreateInfo.pNext                   = nullptr;
@@ -174,10 +286,10 @@ bool CreateInstance(VkInstance& instance, const char* applicationName, const std
     instanceCreateInfo.pApplicationInfo        = &appInfo;
     instanceCreateInfo.enabledLayerCount       = (sizeof(validationLayers) / sizeof(const char*));
     instanceCreateInfo.ppEnabledLayerNames     = validationLayers;
-    instanceCreateInfo.enabledExtensionCount   = extensionNames.size();
-    instanceCreateInfo.ppEnabledExtensionNames = extensionNames.data();
+    instanceCreateInfo.enabledExtensionCount   = extensions.size();
+    instanceCreateInfo.ppEnabledExtensionNames = extensions.data();
 
-    result = vkCreateInstance(&instanceCreateInfo, nullptr, &instance);
+    result = vkCreateInstance(&instanceCreateInfo, nullptr, &deviceData.instance);
     if (result != VK_SUCCESS)
     {
         null::debug::AssertFail("Failed to create Vulkan instance\n");
@@ -188,7 +300,7 @@ bool CreateInstance(VkInstance& instance, const char* applicationName, const std
 }
 
 #ifdef NE_DEBUG
-bool SetupDebugMessenger(VkInstance& instance, VkDebugUtilsMessengerEXT& debugMessenger, void* userData)
+bool SetupDebugMessenger(null::system::DeviceData& deviceData, void* userData)
 {
     VkResult result;
 
@@ -206,10 +318,10 @@ bool SetupDebugMessenger(VkInstance& instance, VkDebugUtilsMessengerEXT& debugMe
     debugCreateInfo.pfnUserCallback = null::system::DebugCallback;
     debugCreateInfo.pUserData = &userData;
 
-    auto debugMessengerCreate = reinterpret_cast<PFN_vkCreateDebugUtilsMessengerEXT>(vkGetInstanceProcAddr(instance, "vkCreateDebugUtilsMessengerEXT"));
+    auto debugMessengerCreate = reinterpret_cast<PFN_vkCreateDebugUtilsMessengerEXT>(vkGetInstanceProcAddr(deviceData.instance, "vkCreateDebugUtilsMessengerEXT"));
     if (debugMessengerCreate)
     {
-        result = debugMessengerCreate(instance, &debugCreateInfo, nullptr, &debugMessenger);
+        result = debugMessengerCreate(deviceData.instance, &debugCreateInfo, nullptr, &deviceData.debugMessenger);
         if (result != VK_SUCCESS)
         {
             null::debug::AssertFail("Failed to assign Vulkan debug callback\n");
@@ -226,10 +338,10 @@ bool SetupDebugMessenger(VkInstance& instance, VkDebugUtilsMessengerEXT& debugMe
 }
 #endif //NE_DEBUG
 
-bool SelectPhysicalDevice(VkInstance& instance, VkPhysicalDevice& physicalDevice)
+bool SelectPhysicalDevice(null::system::DeviceData& deviceData, const std::vector<std::string>& instanceExtensions, std::vector<std::string>& deviceExtensions)
 {
     null::math::uint32 deviceCount = 0;
-    vkEnumeratePhysicalDevices(instance, &deviceCount, nullptr);
+    vkEnumeratePhysicalDevices(deviceData.instance, &deviceCount, nullptr);
 
     if (deviceCount == 0)
     {
@@ -238,18 +350,22 @@ bool SelectPhysicalDevice(VkInstance& instance, VkPhysicalDevice& physicalDevice
     }
 
     std::vector<VkPhysicalDevice> devices(deviceCount);
-    vkEnumeratePhysicalDevices(instance, &deviceCount, devices.data());
+    vkEnumeratePhysicalDevices(deviceData.instance, &deviceCount, devices.data());
 
-    for (const VkPhysicalDevice& device : devices)
+    for (VkPhysicalDevice& device : devices)
     {
-        if (IsDeviceSuitable(device))
+        deviceData.physicalDevice = device;
+        GetDeviceExtensions(device, deviceExtensions);
+
+        if (IsDeviceSuitable(deviceData, deviceExtensions))
         {
-            physicalDevice = device;
+            deviceData.physicalDevice = device;
             break;
         }
+        deviceData.physicalDevice = VK_NULL_HANDLE;
     }
 
-    if (physicalDevice == VK_NULL_HANDLE)
+    if (deviceData.physicalDevice == VK_NULL_HANDLE)
     {
         null::debug::AssertFail("Failed to find a suitable GPU\n");
         return false;
@@ -258,7 +374,7 @@ bool SelectPhysicalDevice(VkInstance& instance, VkPhysicalDevice& physicalDevice
     return true;
 }
 
-bool CreateLogicalDevice(VkInstance& instance, VkPhysicalDevice& physicalDevice, VkDevice& device, QueueFamilySet& queueFamilySet)
+bool CreateLogicalDevice(null::system::DeviceData& deviceData, QueueFamilySet& queueFamilySet)
 {
     VkResult result;
 
@@ -278,12 +394,14 @@ bool CreateLogicalDevice(VkInstance& instance, VkPhysicalDevice& physicalDevice,
     VkPhysicalDeviceFeatures deviceFeatures{};
 
     VkDeviceCreateInfo createInfo{};
-    createInfo.sType                = VK_STRUCTURE_TYPE_DEVICE_CREATE_INFO;
-    createInfo.pQueueCreateInfos    = queueCreateInfos.data();
-    createInfo.queueCreateInfoCount = queueCreateInfos.size();
-    createInfo.pEnabledFeatures     = &deviceFeatures;
+    createInfo.sType                   = VK_STRUCTURE_TYPE_DEVICE_CREATE_INFO;
+    createInfo.pQueueCreateInfos       = queueCreateInfos.data();
+    createInfo.queueCreateInfoCount    = queueCreateInfos.size();
+    createInfo.pEnabledFeatures        = &deviceFeatures;
+    createInfo.enabledExtensionCount   = sizeof(requiredDeviceExtensions) / sizeof(const char*);
+    createInfo.ppEnabledExtensionNames = requiredDeviceExtensions;
 
-    result = vkCreateDevice(physicalDevice, &createInfo, nullptr, &device);
+    result = vkCreateDevice(deviceData.physicalDevice, &createInfo, nullptr, &deviceData.device);
     if (result != VK_SUCCESS)
     {
         null::debug::AssertFail("Failed to create logical device\n");
@@ -297,7 +415,18 @@ bool null::system::Device::Init()
 {
     const WindowDeviceData& windowDeviceData = m_engine.GetWindow().GetWindowDeviceData();
 
-    if (!CreateInstance(m_deviceData->instance, m_engine.GetApplicationName(), windowDeviceData.requiredExtensions))
+    std::vector<std::string> instanceExtensions;
+    std::vector<std::string> deviceExtensions;
+
+    if (!GetInstanceExtensions(instanceExtensions))
+    {
+        m_debugMessage = "Failed to determine required instance extensions";
+        debug::AssertFail("%s\n", m_debugMessage.c_str());
+        return false;
+    }
+    instanceExtensions.insert(instanceExtensions.end(), windowDeviceData.requiredExtensions.begin(), windowDeviceData.requiredExtensions.end());
+
+    if (!CreateInstance(*m_deviceData, m_engine.GetApplicationName(), instanceExtensions))
     {
         m_debugMessage = "Failed to create Vulkan instance";
         debug::AssertFail("%s\n", m_debugMessage.c_str());
@@ -305,7 +434,7 @@ bool null::system::Device::Init()
     }
 
 #ifdef NE_DEBUG
-    if (!SetupDebugMessenger(m_deviceData->instance, m_deviceData->debugMessenger, &m_engine))
+    if (!SetupDebugMessenger(*m_deviceData, &m_engine))
     {
         m_debugMessage = "Failed to setup debug messenger";
         debug::AssertFail("%s\n", m_debugMessage.c_str());
@@ -318,14 +447,14 @@ bool null::system::Device::Init()
         return false;
     }
 
-    if (!SelectPhysicalDevice(m_deviceData->instance, m_deviceData->physicalDevice))
+    if (!SelectPhysicalDevice(*m_deviceData, instanceExtensions, deviceExtensions))
     {
         m_debugMessage = "Failed to select physical device";
         debug::AssertFail("%s\n", m_debugMessage.c_str());
         return false;
     }
 
-    QueueFamilySet queueFamilySet = GetDeviceQueueFamilies(m_deviceData->physicalDevice, m_deviceData->surface);
+    QueueFamilySet queueFamilySet = GetDeviceQueueFamilies(*m_deviceData);
     if (!queueFamilySet.IsValid())
     {
         m_debugMessage = "Missing required queue families";
@@ -333,7 +462,7 @@ bool null::system::Device::Init()
         return false;
     }
 
-    if (!CreateLogicalDevice(m_deviceData->instance, m_deviceData->physicalDevice, m_deviceData->device, queueFamilySet))
+    if (!CreateLogicalDevice(*m_deviceData, queueFamilySet))
     {
         m_debugMessage = "Failed to create logical device";
         debug::AssertFail("%s\n", m_debugMessage.c_str());
