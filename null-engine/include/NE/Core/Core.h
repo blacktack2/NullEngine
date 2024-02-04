@@ -8,6 +8,7 @@
 
 #include "NE/Core/CoreTypes.h"
 #include "NE/System/SystemTypes.h"
+#include "NE/Math/MathConstants.h"
 #include "NE/Math/MathTypes.h"
 
 #endif //NULLENGINE_CORE_H

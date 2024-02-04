@@ -13,12 +13,16 @@ namespace null
     {
         struct DeviceData
         {
-            VkInstance       instance;
-            VkPhysicalDevice physicalDevice = VK_NULL_HANDLE;
-            VkDevice         device;
-            VkSurfaceKHR     surface;
-            VkQueue          graphicsQueue;
-            VkQueue          presentQueue;
+            VkInstance           instance;
+            VkPhysicalDevice     physicalDevice = VK_NULL_HANDLE;
+            VkDevice             device;
+            VkSurfaceKHR         surface;
+            VkQueue              graphicsQueue;
+            VkQueue              presentQueue;
+            VkSwapchainKHR       swapChain;
+            std::vector<VkImage> swapChainImages;
+            VkFormat             swapChainImageFormat;
+            VkExtent2D           swapChainExtent;
 #ifdef NE_DEBUG
             VkDebugUtilsMessengerEXT debugMessenger;
 #endif //NE_DEBUG

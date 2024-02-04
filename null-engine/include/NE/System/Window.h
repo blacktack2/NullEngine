@@ -27,6 +27,14 @@ namespace null
                 m_width  = width;
                 m_height = height;
             }
+            math::uint32 GetWidth() const
+            {
+                return m_width;
+            }
+            math::uint32 GetHeight() const
+            {
+                return m_height;
+            }
 
             void SetTitle(std::string_view title)
             {

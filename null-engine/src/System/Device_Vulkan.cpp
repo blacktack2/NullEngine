@@ -8,8 +8,10 @@
 
 #include "NE/Util/Enum.h"
 
+#include <algorithm>
 #include <array>
 #include <cstring>
+#include <limits>
 #include <optional>
 #include <vector>
 
@@ -122,6 +124,51 @@ QueueFamilySet GetDeviceQueueFamilies(null::system::DeviceData& deviceData)
     return queueFamilySet;
 }
 
+VkSurfaceFormatKHR ChooseSwapSurfaceFormat(const std::vector<VkSurfaceFormatKHR>& availableFormats)
+{
+    for (const VkSurfaceFormatKHR& format : availableFormats)
+    {
+        if (format.format == VK_FORMAT_B8G8R8A8_SRGB && format.colorSpace == VK_COLORSPACE_SRGB_NONLINEAR_KHR)
+        {
+            return format;
+        }
+    }
+    return availableFormats[0];
+}
+
+VkPresentModeKHR ChooseSwapPresentMode(const std::vector<VkPresentModeKHR>& availablePresentModes)
+{
+    for (const VkPresentModeKHR& presentMode : availablePresentModes)
+    {
+        if (presentMode == VK_PRESENT_MODE_MAILBOX_KHR)
+        {
+            return presentMode;
+        }
+    }
+    return VK_PRESENT_MODE_FIFO_KHR;
+}
+
+VkExtent2D ChooseSwapExtent(const null::system::Window& window, const VkSurfaceCapabilitiesKHR& capabilities)
+{
+    if (capabilities.currentExtent.width == std::numeric_limits<null::math::uint32>::max())
+    {
+        return capabilities.currentExtent;
+    }
+    else
+    {
+        VkExtent2D actualExtent =
+        {
+            (null::math::uint32)window.GetWidth(),
+            (null::math::uint32)window.GetHeight()
+        };
+
+        actualExtent.width  = std::clamp(actualExtent.width,  capabilities.minImageExtent.width,  capabilities.maxImageExtent.width );
+        actualExtent.height = std::clamp(actualExtent.height, capabilities.minImageExtent.height, capabilities.maxImageExtent.height);
+
+        return actualExtent;
+    }
+}
+
 SwapChainSupportData GetSwapChainSupport(null::system::DeviceData& deviceData)
 {
     SwapChainSupportData data;
@@ -145,6 +192,81 @@ SwapChainSupportData GetSwapChainSupport(null::system::DeviceData& deviceData)
     }
 
     return data;
+}
+
+bool CreateSwapChain(null::system::DeviceData& deviceData, const null::system::Window& window, QueueFamilySet& queueFamilySet)
+{
+    VkResult result;
+
+    SwapChainSupportData swapChainSupport = GetSwapChainSupport(deviceData);
+
+    VkSurfaceFormatKHR surfaceFormat = ChooseSwapSurfaceFormat(swapChainSupport.formats);
+    VkPresentModeKHR  presentMode = ChooseSwapPresentMode(swapChainSupport.presentModes);
+    VkExtent2D extent = ChooseSwapExtent(window, swapChainSupport.capabilities);
+
+    null::math::uint32 imageCount = std::clamp(
+        swapChainSupport.capabilities.minImageCount + 1,
+        swapChainSupport.capabilities.minImageCount,
+        swapChainSupport.capabilities.maxImageCount > 0 ? swapChainSupport.capabilities.maxImageCount : null::math::NE_MAX_U32
+    );
+
+    null::math::uint32 queueFamilyIndices[] = {
+        queueFamilySet.queueFamilies[(null::math::size)QueueFamily::GraphicsFamily].value(),
+        queueFamilySet.queueFamilies[(null::math::size)QueueFamily::PresentationFamily].value(),
+    };
+
+    VkSwapchainCreateInfoKHR createInfo{};
+    createInfo.sType = VK_STRUCTURE_TYPE_SWAPCHAIN_CREATE_INFO_KHR;
+    createInfo.surface = deviceData.surface;
+    createInfo.minImageCount = imageCount;
+    createInfo.imageFormat = surfaceFormat.format;
+    createInfo.imageColorSpace = surfaceFormat.colorSpace;
+    createInfo.imageExtent = extent;
+    createInfo.imageArrayLayers = 1;
+    createInfo.imageUsage = VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT;
+    if (queueFamilySet.queueFamilies[(null::math::size)QueueFamily::GraphicsFamily] == queueFamilySet.queueFamilies[(null::math::size)QueueFamily::PresentationFamily])
+    {
+        createInfo.imageSharingMode = VK_SHARING_MODE_CONCURRENT;
+        createInfo.queueFamilyIndexCount = 2;
+        createInfo.pQueueFamilyIndices = queueFamilyIndices;
+    }
+    else
+    {
+        createInfo.imageSharingMode = VK_SHARING_MODE_EXCLUSIVE;
+        createInfo.queueFamilyIndexCount = 0;
+        createInfo.pQueueFamilyIndices = nullptr;
+    }
+    createInfo.preTransform = swapChainSupport.capabilities.currentTransform;
+    createInfo.compositeAlpha = VK_COMPOSITE_ALPHA_OPAQUE_BIT_KHR;
+    createInfo.presentMode = presentMode;
+    createInfo.clipped = VK_TRUE;
+    createInfo.oldSwapchain = VK_NULL_HANDLE;
+
+    result = vkCreateSwapchainKHR(deviceData.device, &createInfo, nullptr, &deviceData.swapChain);
+    if (result != VK_SUCCESS)
+    {
+        null::debug::AssertFail("Failed to create Vulkan swapchain\n");
+        return false;
+    }
+
+    result = vkGetSwapchainImagesKHR(deviceData.device, deviceData.swapChain, &imageCount, nullptr);
+    if (result != VK_SUCCESS)
+    {
+        null::debug::AssertFail("Failed to get swapchain image count\n");
+        return false;
+    }
+    deviceData.swapChainImages.resize(imageCount);
+    result = vkGetSwapchainImagesKHR(deviceData.device, deviceData.swapChain, &imageCount, deviceData.swapChainImages.data());
+    if (result != VK_SUCCESS)
+    {
+        null::debug::AssertFail("Failed to get swapchain images\n");
+        return false;
+    }
+
+    deviceData.swapChainImageFormat = surfaceFormat.format;
+    deviceData.swapChainExtent = extent;
+
+    return true;
 }
 
 bool GetInstanceExtensions(std::vector<std::string>& extensions)
@@ -482,6 +604,8 @@ bool null::system::Device::Init()
         &m_deviceData->presentQueue
     );
 
+    CreateSwapChain(*m_deviceData, m_engine.GetWindow(), queueFamilySet);
+
     return true;
 }
 
@@ -500,7 +624,9 @@ void null::system::Device::Destroy()
 #endif //NE_DEBUG
     if (m_deviceData->instance)
     {
+        vkDestroySwapchainKHR(m_deviceData->device, m_deviceData->swapChain, nullptr);
         vkDestroyDevice(m_deviceData->device, nullptr);
+        vkDestroySurfaceKHR(m_deviceData->instance, m_deviceData->surface, nullptr);
         vkDestroyInstance(m_deviceData->instance, nullptr);
     }
 }

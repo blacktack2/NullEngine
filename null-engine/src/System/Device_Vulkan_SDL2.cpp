@@ -15,7 +15,6 @@ null::system::Device::Device(core::Engine& engine)
 
 null::system::Device::~Device()
 {
-    vkDestroySurfaceKHR(m_deviceData->instance, m_deviceData->surface, nullptr);
     Destroy();
 }
 
