@@ -269,6 +269,39 @@ bool CreateSwapChain(null::system::DeviceData& deviceData, const null::system::W
     return true;
 }
 
+bool CreateSwapChainViews(null::system::DeviceData& deviceData)
+{
+    VkResult result;
+
+    deviceData.swapChainImageViews.resize(deviceData.swapChainImages.size());
+
+    for (null::math::size i = 0; i < deviceData.swapChainImageViews.size(); ++i)
+    {
+        VkImageViewCreateInfo createInfo{};
+        createInfo.sType    = VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO;
+        createInfo.image    = deviceData.swapChainImages[i];
+        createInfo.viewType = VK_IMAGE_VIEW_TYPE_2D;
+        createInfo.format   = deviceData.swapChainImageFormat;
+        createInfo.components.r = VK_COMPONENT_SWIZZLE_IDENTITY;
+        createInfo.components.g = VK_COMPONENT_SWIZZLE_IDENTITY;
+        createInfo.components.b = VK_COMPONENT_SWIZZLE_IDENTITY;
+        createInfo.components.a = VK_COMPONENT_SWIZZLE_IDENTITY;
+        createInfo.subresourceRange.aspectMask     = VK_IMAGE_ASPECT_COLOR_BIT;
+        createInfo.subresourceRange.baseMipLevel   = 0;
+        createInfo.subresourceRange.levelCount     = 1;
+        createInfo.subresourceRange.baseArrayLayer = 0;
+        createInfo.subresourceRange.layerCount     = 1;
+        result = vkCreateImageView(deviceData.device, &createInfo, nullptr, &deviceData.swapChainImageViews[i]);
+        if (result != VK_SUCCESS)
+        {
+            null::debug::AssertFail("Failed to create view for swapchain image %u\n", i);
+            return false;
+        }
+    }
+
+    return true;
+}
+
 bool GetInstanceExtensions(std::vector<std::string>& extensions)
 {
     VkResult result;
@@ -604,7 +637,18 @@ bool null::system::Device::Init()
         &m_deviceData->presentQueue
     );
 
-    CreateSwapChain(*m_deviceData, m_engine.GetWindow(), queueFamilySet);
+    if (!CreateSwapChain(*m_deviceData, m_engine.GetWindow(), queueFamilySet))
+    {
+        m_debugMessage = "Failed to create swapchain images";
+        debug::AssertFail("%s\n", m_debugMessage.c_str());
+        return false;
+    }
+    if (!CreateSwapChainViews(*m_deviceData))
+    {
+        m_debugMessage = "Failed to create swapchain views";
+        debug::AssertFail("%s\n", m_debugMessage.c_str());
+        return false;
+    }
 
     return true;
 }
@@ -624,6 +668,10 @@ void null::system::Device::Destroy()
 #endif //NE_DEBUG
     if (m_deviceData->instance)
     {
+        for (auto imageView : m_deviceData->swapChainImageViews)
+        {
+            vkDestroyImageView(m_deviceData->device, imageView, nullptr);
+        }
         vkDestroySwapchainKHR(m_deviceData->device, m_deviceData->swapChain, nullptr);
         vkDestroyDevice(m_deviceData->device, nullptr);
         vkDestroySurfaceKHR(m_deviceData->instance, m_deviceData->surface, nullptr);
