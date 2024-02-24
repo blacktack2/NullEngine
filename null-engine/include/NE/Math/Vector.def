@@ -89,9 +89,9 @@ namespace null
         public:
             union
             {
-                [[maybe_unused]] NE_COMPONENT v[1];
-                [[maybe_unused]] NE_COMPONENT x;
-                [[maybe_unused]] NE_COMPONENT r;
+                NE_COMPONENT v[1];
+                NE_COMPONENT x;
+                NE_COMPONENT r;
             };
         public:
             NE_MATH_INL_CEX NE_VECTOR1();
@@ -161,9 +161,9 @@ namespace null
         public:
             union
             {
-                [[maybe_unused]] NE_COMPONENT v[2];
-                struct { [[maybe_unused]] NE_COMPONENT x, y; };
-                struct { [[maybe_unused]] NE_COMPONENT r, g; };
+                NE_COMPONENT v[2];
+                struct { NE_COMPONENT x, y; };
+                struct { NE_COMPONENT r, g; };
             };
         public:
             NE_MATH_INL_CEX NE_VECTOR2();
@@ -234,9 +234,9 @@ namespace null
         public:
             union
             {
-                [[maybe_unused]] NE_COMPONENT v[3];
-                struct { [[maybe_unused]] NE_COMPONENT x, y, z; };
-                struct { [[maybe_unused]] NE_COMPONENT r, g, b; };
+                NE_COMPONENT v[3];
+                struct { NE_COMPONENT x, y, z; };
+                struct { NE_COMPONENT r, g, b; };
             };
         public:
             NE_MATH_INL_CEX NE_VECTOR3();
@@ -309,9 +309,9 @@ namespace null
         public:
             union
             {
-                [[maybe_unused]] NE_COMPONENT v[4];
-                struct { [[maybe_unused]] NE_COMPONENT x, y, z, w; };
-                struct { [[maybe_unused]] NE_COMPONENT r, g, b, a; };
+                NE_COMPONENT v[4];
+                struct { NE_COMPONENT x, y, z, w; };
+                struct { NE_COMPONENT r, g, b, a; };
             };
         public:
             NE_MATH_INL_CEX NE_VECTOR4();
@@ -391,9 +391,9 @@ namespace null
             {
                 // Vector part 0-2,xyz,ijk (direction vector)
                 // Scalar part  3 , w , a  (angle)
-                [[maybe_unused]] NE_COMPONENT v[4];
-                struct { [[maybe_unused]] NE_COMPONENT x, y, z, w; };
-                struct { [[maybe_unused]] NE_COMPONENT i, j, k, a; };
+                NE_COMPONENT v[4];
+                struct { NE_COMPONENT x, y, z, w; };
+                struct { NE_COMPONENT i, j, k, a; };
             };
         public:
             NE_MATH_INL_CEX NE_QUAT();
