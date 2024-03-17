@@ -726,5 +726,5 @@ pip-selfcheck.json
 # NullEngine #
 ##############
 
-!null-engine/include/NE/Core/Debug/
+!null-engine/include/**
 .idea
