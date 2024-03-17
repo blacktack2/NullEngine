@@ -1,5 +1,4 @@
-#ifndef NULLENGINE_ENGINE_H
-#define NULLENGINE_ENGINE_H
+#pragma once
 
 #include "NE/Core/Core.h"
 
@@ -117,5 +116,3 @@ namespace null
         };
     } // namespace core
 } // namespace null
-
-#endif //NULLENGINE_ENGINE_H
