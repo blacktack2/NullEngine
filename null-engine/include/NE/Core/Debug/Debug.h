@@ -1,5 +1,4 @@
-#ifndef NULLENGINE_DEBUG_H
-#define NULLENGINE_DEBUG_H
+#pragma once
 
 #ifdef NE_CUSTOM_DEBUG_IMPL
 #define NE_DEBUG_DECL(decl) decl;
@@ -27,5 +26,3 @@ namespace null
 #ifdef NE_DEBUG_STANDARD_IMPL
 #include "Debug.inl"
 #endif
-
-#endif //NULLENGINE_DEBUG_H

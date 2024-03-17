@@ -1,5 +1,4 @@
-#ifndef NULLENGINE_CORETYPES_H
-#define NULLENGINE_CORETYPES_H
+#pragma once
 
 namespace null
 {
@@ -8,5 +7,3 @@ namespace null
         class Engine;
     } // namespace system
 } // namespace null
-
-#endif //NULLENGINE_CORETYPES_H

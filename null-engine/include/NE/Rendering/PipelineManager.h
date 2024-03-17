@@ -1,5 +1,4 @@
-#ifndef HELLOTRIANGLE_PIPELINEMANAGER_H
-#define HELLOTRIANGLE_PIPELINEMANAGER_H
+#pragma once
 
 #include "NE/Core/Core.h"
 
@@ -12,7 +11,7 @@ namespace null
         class RenderPass;
 
         /**
-         * Description structure for a full render-pipeline.
+         * Render-pipeline descriptor object.
          */
         struct PipelineDesc
         {
@@ -44,5 +43,3 @@ namespace null
         };
     } // namespace render
 } // namespace null
-
-#endif //HELLOTRIANGLE_PIPELINEMANAGER_H

@@ -1,8 +1,7 @@
 /**
  * Math library loosely based on hlsl types and functionality.
  */
-#ifndef NULLENGINE_VECTOR_H
-#define NULLENGINE_VECTOR_H
+#pragma once
 
 #include "NE/Math/MathTypes.h"
 #include "NE/Core/Debug/Debug.h"
@@ -55,5 +54,3 @@
 #define NE_VECTORMATH_OP_INC_DEC
 
 #include "Vector.def"
-
-#endif //NULLENGINE_VECTOR_H

@@ -1,5 +1,4 @@
-#ifndef EXAMPLE_MATHTYPES_H
-#define EXAMPLE_MATHTYPES_H
+#pragma once
 
 #include "NE/Common.h"
 
@@ -57,5 +56,3 @@ NE_VECTORMATH_CLASS_DECL(type##Quat)\
         NE_MATRIX_CLASS_DECL(Long);
     }
 }
-
-#endif //EXAMPLE_MATHTYPES_H
