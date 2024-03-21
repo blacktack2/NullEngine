@@ -711,4 +711,5 @@ cython_debug/
 ##############
 
 !null-engine/include/*
+null-engine/include/NE/ShaderList.h
 .idea
