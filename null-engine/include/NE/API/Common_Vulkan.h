@@ -83,6 +83,12 @@ namespace null
             return VK_FALSE;
         }
     } // namespace system
+    namespace render
+    {
+        struct ShaderData
+        {
+        };
+    }
 } // namespace null
 
 #endif //NE_BUILD_VULKAN

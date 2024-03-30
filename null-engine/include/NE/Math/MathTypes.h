@@ -3,6 +3,7 @@
 #include "NE/Common.h"
 
 #include <cstddef>
+#include <limits>
 
 namespace null
 {

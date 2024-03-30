@@ -7,5 +7,6 @@
 
 #include "NE/Core/CoreTypes.h"
 #include "NE/System/SystemTypes.h"
+#include "NE/Rendering/RenderingTypes.h"
 #include "NE/Math/MathConstants.h"
 #include "NE/Math/MathTypes.h"

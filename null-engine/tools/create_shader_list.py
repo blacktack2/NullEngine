@@ -6,6 +6,22 @@ import os
 from tools_common import *
 
 
+def get_shader_stage(filename):
+    if re.match(".+\.(vert)\..+", filename):
+        return "Vertex"
+    elif re.match(".+\.(frag)\..+", filename):
+        return "Fragment"
+    elif re.match(".+\.(tesc)\..+", filename):
+        return "TessCont"
+    elif re.match(".+\.(tese)\..+", filename):
+        return "TessEval"
+    elif re.match(".+\.(geom)\..+", filename):
+        return "Geometry"
+    elif re.match(".+\.(comp)\..+", filename):
+        return "Compute"
+    logger_fatal(f"Malformed filename '{filename}' contains no stage information")
+
+
 def create_shader_list(outfile, shaders, macro):
     if os.path.isfile(outfile):
         with open(outfile, "r") as f:
@@ -18,9 +34,14 @@ def create_shader_list(outfile, shaders, macro):
         "#pragma once",
         "//",
         "",
-        "#include \"NE/Math/MathTypes.h\"",
+        "#include \"NE/Core/Core.h\"",
+        "#include \"NE/Rendering/Shader.h\"",
         "",
-        "typedef null::math::size shader_id;"
+        "struct ShaderSourceDesc",
+        "{",
+        "    const char* sourceFile;",
+        "    null::render::ShaderStage stage;",
+        "};",
         "",
     ]
     if any([(i >= len(lines) or (i != 1 and l != lines[i])) for i, l in enumerate(default_lines)]):
@@ -48,15 +69,15 @@ def create_shader_list(outfile, shaders, macro):
 
         lines.append(f"#if {macro}")
         lines.append("")
-        lines.append("enum class ShaderId : shader_id")
+        lines.append("enum class ShaderId : null::shader_id")
         lines.append("{")
         lines.append("\n".join([f"    {name}," for name in shadernames]))
         lines.append("    _Max,")
         lines.append("};")
         lines.append("")
-        lines.append("const char* g_shaderSources[(null::math::size)ShaderId::_Max] =")
+        lines.append("inline ShaderSourceDesc g_shaderSources[(null::math::size)ShaderId::_Max] =")
         lines.append("{")
-        lines.append("\n".join([f"    \"{source}\"" for source, _ in shaders]))
+        lines.append("\n".join([f"    {{\"{source}\", null::render::ShaderStage::{get_shader_stage(source)}}}," for source, _ in shaders]))
         lines.append("};")
         lines.append("")
         lines.append(f"#endif //{macro}")

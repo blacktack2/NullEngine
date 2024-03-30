@@ -3,6 +3,7 @@
 #include "NE/Core/Core.h"
 
 #include "NE/Rendering/PipelineManager.h"
+#include "NE/Rendering/ShaderManager.h"
 
 #include "NE/System/Device.h"
 #include "NE/System/Input.h"
@@ -85,6 +86,15 @@ namespace null
                 return m_pipelineManager;
             }
 
+            render::ShaderManager& GetShaderManager()
+            {
+                return m_shaderManager;
+            }
+            const render::ShaderManager& GetShaderManager() const
+            {
+                return m_shaderManager;
+            }
+
             const char* GetApplicationName() const
             {
                 return m_appName.c_str();
@@ -104,6 +114,7 @@ namespace null
             system::Input  m_input;
 
             render::PipelineManager m_pipelineManager;
+            render::ShaderManager m_shaderManager;
 
             bool m_isRunning = false;
 

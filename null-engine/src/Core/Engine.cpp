@@ -4,7 +4,13 @@
 #include "NE/System/Window.h"
 
 null::core::Engine::Engine(const char* applicationName)
-    : m_appName(applicationName), m_window(*this), m_device(*this), m_input(*this), m_pipelineManager(*this)
+    :
+    m_appName(applicationName),
+    m_window(*this),
+    m_device(*this),
+    m_input(*this),
+    m_pipelineManager(*this),
+    m_shaderManager(*this)
 {
 
 }
@@ -38,6 +44,7 @@ bool null::core::Engine::Init()
     }
 
     m_pipelineManager.Init();
+    m_shaderManager.Init();
 
     return true;
 }

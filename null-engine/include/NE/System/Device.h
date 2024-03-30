@@ -32,6 +32,15 @@ namespace null
             {
                 return m_debugMessage;
             }
+
+            DeviceData& GetDeviceData()
+            {
+                return *m_deviceData;
+            }
+            const DeviceData& GetDeviceData() const
+            {
+                return *m_deviceData;
+            }
         private:
             void Destroy();
 
