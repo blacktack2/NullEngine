@@ -566,6 +566,26 @@ bool CreateLogicalDevice(null::system::DeviceData& deviceData, QueueFamilySet& q
     return true;
 }
 
+bool CreatePipelineLayout(null::system::DeviceData& deviceData)
+{
+    VkResult result;
+
+    VkPipelineLayoutCreateInfo pipelineLayoutInfo{};
+    pipelineLayoutInfo.sType                  = VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO;
+    pipelineLayoutInfo.setLayoutCount         = 0;
+    pipelineLayoutInfo.pSetLayouts            = nullptr;
+    pipelineLayoutInfo.pushConstantRangeCount = 0;
+    pipelineLayoutInfo.pPushConstantRanges    = nullptr;
+
+    result = vkCreatePipelineLayout(deviceData.device, &pipelineLayoutInfo, nullptr, &deviceData.pipelineLayout);
+    if (result != VK_SUCCESS)
+    {
+        null::debug::AssertFail("Failed to create pipeline layout\n");
+        return false;
+    }
+    return true;
+}
+
 bool null::system::Device::Init()
 {
     const WindowDeviceData& windowDeviceData = m_engine.GetWindow().GetWindowDeviceData();
@@ -655,6 +675,8 @@ bool null::system::Device::Init()
 
 void null::system::Device::Destroy()
 {
+    vkDestroyPipelineLayout(m_deviceData->device, m_deviceData->pipelineLayout, nullptr);
+
 #ifdef NE_DEBUG
     auto debugMessengerDestroy = reinterpret_cast<PFN_vkDestroyDebugUtilsMessengerEXT>(vkGetInstanceProcAddr(m_deviceData->instance, "vkDestroyDebugUtilsMessengerEXT"));
     if (debugMessengerDestroy)
@@ -666,6 +688,7 @@ void null::system::Device::Destroy()
         debug::AssertFail("Unable to safely destroy Vulkan debug messenger\n");
     }
 #endif //NE_DEBUG
+
     if (m_deviceData->instance)
     {
         for (auto imageView : m_deviceData->swapChainImageViews)

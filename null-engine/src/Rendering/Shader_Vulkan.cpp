@@ -79,14 +79,17 @@ null::render::ShaderProgram::ShaderProgram(const ShaderProgramDesc& desc)
 {
     if (desc.compute)
     {
-        debug::Assert(!(desc.vertex || desc.fragment || desc.tessCont || desc.tessEval || desc.geometry), "Compute shaders are not compatible with other stages. Other stages will be ignored\n");
+        debug::Assert(
+                !(IsShaderIdNull(desc.vertex) || IsShaderIdNull(desc.fragment) || IsShaderIdNull(desc.tessCont) || IsShaderIdNull(desc.tessEval) || IsShaderIdNull(desc.geometry)),
+                "Compute shaders are not compatible with other stages. Other stages will be ignored\n"
+                );
         debug::AssertFail("Not implemented\n");
     }
     else
     {
         debug::Assert(desc.vertex, "Vertex shaders are required for non-compute shaders\n");
-        debug::Assert((bool)desc.tessCont == (bool)desc.tessEval, "Must have both or neither of each tesselation stage\n");
+        debug::Assert(IsShaderIdNull(desc.tessCont) == IsShaderIdNull(desc.tessEval), "Must have both or neither of each tesselation stage\n");
     }
 }
 
-#endif //NE_DEVICE_VULKAN
+#endif //NE_BUILD_VULKAN
