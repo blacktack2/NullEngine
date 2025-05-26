@@ -26,8 +26,8 @@ namespace null
             const core::Engine& GetEngine() const;
             system::Window& GetWindow();
             const system::Window& GetWindow() const;
-            system::GraphicsDevice& GetGraphicsDevice();
-            const system::GraphicsDevice& GetDevice() const;
+            render::GraphicsDevice& GetGraphicsDevice();
+            const render::GraphicsDevice& GetDevice() const;
             system::Input& GetInput();
             const system::Input& GetInput()  const;
         private:

@@ -3,7 +3,7 @@
 #ifdef NE_BUILD_VULKAN
 
 #include "NE/API/Common_Vulkan.h"
-#include "NE/System/GraphicsDevice.h"
+#include "NE/Rendering/GraphicsDevice.h"
 
 VkShaderStageFlagBits NeStageToVulkan(null::render::ShaderStage stage)
 {
@@ -35,7 +35,7 @@ null::render::Shader::~Shader()
     }
 }
 
-bool null::render::Shader::Init(system::GraphicsDevice& graphicsDevice, null::render::ShaderStage stage, const void* data, null::math::size dataSize, const char* name)
+bool null::render::Shader::Init(GraphicsDevice& graphicsDevice, null::render::ShaderStage stage, const void* data, null::math::size dataSize, const char* name)
 {
     m_graphicsDevice = &graphicsDevice;
     m_shaderData = std::make_unique<ShaderData>();

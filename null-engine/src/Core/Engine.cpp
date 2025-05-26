@@ -1,6 +1,6 @@
 #include "NE/Core/Engine.h"
 
-#include "NE/System/GraphicsDevice.h"
+#include "NE/Rendering/GraphicsDevice.h"
 #include "NE/System/Window.h"
 
 null::core::Engine::Engine(const char* applicationName)

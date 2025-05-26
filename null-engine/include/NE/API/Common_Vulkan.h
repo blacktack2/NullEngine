@@ -12,6 +12,13 @@ namespace null
 {
     namespace system
     {
+        struct WindowGraphicsDeviceData
+        {
+            std::vector<const char*> requiredExtensions;
+        };
+    }
+    namespace render
+    {
         struct GraphicsDeviceData
         {
             VkInstance               instance;
@@ -29,10 +36,6 @@ namespace null
 #ifdef NE_DEBUG
             VkDebugUtilsMessengerEXT debugMessenger;
 #endif //NE_DEBUG
-        };
-        struct WindowGraphicsDeviceData
-        {
-            std::vector<const char*> requiredExtensions;
         };
 
         static const char* VulkanDebugSeverityToString(VkDebugUtilsMessageSeverityFlagBitsEXT severity)
@@ -68,16 +71,16 @@ namespace null
             if (messageSeverity <= VK_DEBUG_UTILS_MESSAGE_SEVERITY_INFO_BIT_EXT)
             {
                 null::debug::Message("Vulkan error: severity=%s | type=%s | message=%s",
-                                     null::system::VulkanDebugSeverityToString(messageSeverity),
-                                     null::system::VulkanDebugTypeToString(messageType),
+                                     null::render::VulkanDebugSeverityToString(messageSeverity),
+                                     null::render::VulkanDebugTypeToString(messageType),
                                      callbackData->pMessage
                 );
             }
             else
             {
                 null::debug::AssertFail("Vulkan error: severity=%s | type=%s | message=%s\n",
-                                        null::system::VulkanDebugSeverityToString(messageSeverity),
-                                        null::system::VulkanDebugTypeToString(messageType),
+                                        null::render::VulkanDebugSeverityToString(messageSeverity),
+                                        null::render::VulkanDebugTypeToString(messageType),
                                         callbackData->pMessage
                 );
             }

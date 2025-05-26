@@ -1,4 +1,4 @@
-#include "NE/System/GraphicsDevice.h"
+#include "NE/Rendering/GraphicsDevice.h"
 
 #ifdef NE_BUILD_VULKAN
 
@@ -96,7 +96,7 @@ bool CheckValidationLayerSupport()
 }
 #endif //NE_DEBUG
 
-QueueFamilySet GetDeviceQueueFamilies(null::system::GraphicsDeviceData& graphicsDeviceData)
+QueueFamilySet GetDeviceQueueFamilies(null::render::GraphicsDeviceData& graphicsDeviceData)
 {
     null::math::uint32 queueFamilyCount = 0;
     vkGetPhysicalDeviceQueueFamilyProperties(graphicsDeviceData.physicalDevice, &queueFamilyCount, nullptr);
@@ -169,7 +169,7 @@ VkExtent2D ChooseSwapExtent(const null::system::Window& window, const VkSurfaceC
     }
 }
 
-SwapChainSupportData GetSwapChainSupport(null::system::GraphicsDeviceData& graphicsDeviceData)
+SwapChainSupportData GetSwapChainSupport(null::render::GraphicsDeviceData& graphicsDeviceData)
 {
     SwapChainSupportData data;
 
@@ -194,7 +194,7 @@ SwapChainSupportData GetSwapChainSupport(null::system::GraphicsDeviceData& graph
     return data;
 }
 
-bool CreateSwapChain(null::system::GraphicsDeviceData& graphicsDeviceData, const null::system::Window& window, QueueFamilySet& queueFamilySet)
+bool CreateSwapChain(null::render::GraphicsDeviceData& graphicsDeviceData, const null::system::Window& window, QueueFamilySet& queueFamilySet)
 {
     VkResult result;
 
@@ -269,7 +269,7 @@ bool CreateSwapChain(null::system::GraphicsDeviceData& graphicsDeviceData, const
     return true;
 }
 
-bool CreateSwapChainViews(null::system::GraphicsDeviceData& graphicsDeviceData)
+bool CreateSwapChainViews(null::render::GraphicsDeviceData& graphicsDeviceData)
 {
     VkResult result;
 
@@ -386,7 +386,7 @@ bool AreExtensionsSupported(const std::vector<std::string>& deviceExtensions)
     return true;
 }
 
-bool IsDeviceSuitable(null::system::GraphicsDeviceData& graphicsDeviceData, const std::vector<std::string>& deviceExtensions)
+bool IsDeviceSuitable(null::render::GraphicsDeviceData& graphicsDeviceData, const std::vector<std::string>& deviceExtensions)
 {
     VkPhysicalDeviceProperties deviceProperties;
     vkGetPhysicalDeviceProperties(graphicsDeviceData.physicalDevice, &deviceProperties);
@@ -410,7 +410,7 @@ bool IsDeviceSuitable(null::system::GraphicsDeviceData& graphicsDeviceData, cons
     return true;
 }
 
-bool CreateInstance(null::system::GraphicsDeviceData& graphicsDeviceData, const char* applicationName, const std::vector<std::string>& instanceExtensions)
+bool CreateInstance(null::render::GraphicsDeviceData& graphicsDeviceData, const char* applicationName, const std::vector<std::string>& instanceExtensions)
 {
     if (!CheckValidationLayerSupport())
     {
@@ -455,7 +455,7 @@ bool CreateInstance(null::system::GraphicsDeviceData& graphicsDeviceData, const 
 }
 
 #ifdef NE_DEBUG
-bool SetupDebugMessenger(null::system::GraphicsDeviceData& graphicsDeviceData, void* userData)
+bool SetupDebugMessenger(null::render::GraphicsDeviceData& graphicsDeviceData, void* userData)
 {
     VkResult result;
 
@@ -470,7 +470,7 @@ bool SetupDebugMessenger(null::system::GraphicsDeviceData& graphicsDeviceData, v
             VK_DEBUG_UTILS_MESSAGE_TYPE_GENERAL_BIT_EXT |
             VK_DEBUG_UTILS_MESSAGE_TYPE_VALIDATION_BIT_EXT |
             VK_DEBUG_UTILS_MESSAGE_TYPE_PERFORMANCE_BIT_EXT;
-    debugCreateInfo.pfnUserCallback = null::system::DebugCallback;
+    debugCreateInfo.pfnUserCallback = null::render::DebugCallback;
     debugCreateInfo.pUserData = &userData;
 
     auto debugMessengerCreate = reinterpret_cast<PFN_vkCreateDebugUtilsMessengerEXT>(vkGetInstanceProcAddr(graphicsDeviceData.instance, "vkCreateDebugUtilsMessengerEXT"));
@@ -493,7 +493,7 @@ bool SetupDebugMessenger(null::system::GraphicsDeviceData& graphicsDeviceData, v
 }
 #endif //NE_DEBUG
 
-bool SelectPhysicalDevice(null::system::GraphicsDeviceData& graphicsDeviceData, const std::vector<std::string>& instanceExtensions, std::vector<std::string>& deviceExtensions)
+bool SelectPhysicalDevice(null::render::GraphicsDeviceData& graphicsDeviceData, const std::vector<std::string>& instanceExtensions, std::vector<std::string>& deviceExtensions)
 {
     null::math::uint32 deviceCount = 0;
     vkEnumeratePhysicalDevices(graphicsDeviceData.instance, &deviceCount, nullptr);
@@ -529,7 +529,7 @@ bool SelectPhysicalDevice(null::system::GraphicsDeviceData& graphicsDeviceData, 
     return true;
 }
 
-bool CreateLogicalDevice(null::system::GraphicsDeviceData& graphicsDeviceData, QueueFamilySet& queueFamilySet)
+bool CreateLogicalDevice(null::render::GraphicsDeviceData& graphicsDeviceData, QueueFamilySet& queueFamilySet)
 {
     VkResult result;
 
@@ -566,7 +566,7 @@ bool CreateLogicalDevice(null::system::GraphicsDeviceData& graphicsDeviceData, Q
     return true;
 }
 
-bool CreatePipelineLayout(null::system::GraphicsDeviceData& graphicsDeviceData)
+bool CreatePipelineLayout(null::render::GraphicsDeviceData& graphicsDeviceData)
 {
     VkResult result;
 
@@ -586,9 +586,9 @@ bool CreatePipelineLayout(null::system::GraphicsDeviceData& graphicsDeviceData)
     return true;
 }
 
-bool null::system::GraphicsDevice::Init()
+bool null::render::GraphicsDevice::Init()
 {
-    const WindowGraphicsDeviceData& windowGraphicsDeviceData = m_engine.GetWindow().GetGraphicsDeviceWindowData();
+    const system::WindowGraphicsDeviceData& windowGraphicsDeviceData = m_engine.GetWindow().GetGraphicsDeviceWindowData();
 
     std::vector<std::string> instanceExtensions;
     std::vector<std::string> deviceExtensions;
@@ -673,7 +673,7 @@ bool null::system::GraphicsDevice::Init()
     return true;
 }
 
-void null::system::GraphicsDevice::Destroy()
+void null::render::GraphicsDevice::Destroy()
 {
     vkDestroyPipelineLayout(m_graphicsDeviceData->device, m_graphicsDeviceData->pipelineLayout, nullptr);
 

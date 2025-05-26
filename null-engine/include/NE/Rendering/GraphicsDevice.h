@@ -10,7 +10,7 @@
 
 namespace null
 {
-    namespace system
+    namespace render
     {
         /**
          * Wrapper class for managing the graphics device and all relevant API/functionality.
@@ -51,5 +51,5 @@ namespace null
 
             std::string m_debugMessage;
         };
-    } // namespace system
+    } // namespace render
 } // namespace null

@@ -33,12 +33,12 @@ const null::system::Window &null::render::RenderPass::GetWindow() const
     return m_engine.GetWindow();
 }
 
-null::system::GraphicsDevice &null::render::RenderPass::GetGraphicsDevice()
+null::render::GraphicsDevice &null::render::RenderPass::GetGraphicsDevice()
 {
     return m_engine.GetGraphicsDevice();
 }
 
-const null::system::GraphicsDevice &null::render::RenderPass::GetDevice() const
+const null::render::GraphicsDevice &null::render::RenderPass::GetDevice() const
 {
     return m_engine.GetDevice();
 }

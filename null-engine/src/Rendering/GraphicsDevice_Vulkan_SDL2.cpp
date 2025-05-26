@@ -1,4 +1,4 @@
-#include "NE/System/GraphicsDevice.h"
+#include "NE/Rendering/GraphicsDevice.h"
 
 #if defined(NE_BUILD_SDL2) && defined(NE_BUILD_VULKAN)
 
@@ -6,14 +6,14 @@
 
 #include "NE/Core/Engine.h"
 
-null::system::GraphicsDevice::GraphicsDevice(core::Engine& engine)
+null::render::GraphicsDevice::GraphicsDevice(core::Engine& engine)
         :
         m_engine(engine),
         m_graphicsDeviceData(std::make_unique<GraphicsDeviceData>())
 {
 }
 
-null::system::GraphicsDevice::~GraphicsDevice()
+null::render::GraphicsDevice::~GraphicsDevice()
 {
     Destroy();
 }
@@ -33,7 +33,7 @@ bool CreateSurface(SDL_Window* window, VkInstance& instance, VkSurfaceKHR& surfa
     return true;
 }
 
-bool null::system::GraphicsDevice::WindowInit()
+bool null::render::GraphicsDevice::WindowInit()
 {
     if (!CreateSurface(m_engine.GetWindow().GetWindowData().window, m_graphicsDeviceData->instance, m_graphicsDeviceData->surface))
     {

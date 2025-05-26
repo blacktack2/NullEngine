@@ -11,13 +11,13 @@ namespace null
 
     namespace render
     {
+        struct GraphicsDeviceData;
+        class GraphicsDevice;
+
         class RenderPass;
 
         struct PipelineDesc;
         class PipelineManager;
-
-        struct MeshDesc;
-        class Mesh;
 
         struct ShaderData;
         class Shader;
