@@ -1,5 +1,4 @@
-#ifndef NULLENGINE_ENUM_H
-#define NULLENGINE_ENUM_H
+#pragma once
 
 #define NE_ENUM_ENUMERATOR_BEGIN(enumType, dataType) \
 enum class enumType : dataType
@@ -31,5 +30,3 @@ inline bool operator ~ (enumType a)                                             
 {                                                                                     \
     return (bool)a;                                                                   \
 }
-
-#endif //NULLENGINE_ENUM_H

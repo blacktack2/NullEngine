@@ -1,5 +1,4 @@
-#ifndef NULLENGINE_COMMON_SDL2_VULKAN_H
-#define NULLENGINE_COMMON_SDL2_VULKAN_H
+#pragma once
 
 #if defined(NE_BUILD_SDL2) && defined(NE_BUILD_VULKAN)
 
@@ -16,5 +15,3 @@ namespace null
 } // namespace null
 
 #endif //defined(NE_BUILD_SDL2) && defined(NE_BUILD_VULKAN)
-
-#endif //NULLENGINE_COMMON_SDL2_VULKAN_H

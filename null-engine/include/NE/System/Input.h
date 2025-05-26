@@ -1,5 +1,4 @@
-#ifndef NULLENGINE_INPUT_H
-#define NULLENGINE_INPUT_H
+#pragma once
 
 #include "NE/Core/Core.h"
 
@@ -72,5 +71,3 @@ namespace null
         };
     } // namespace system
 } // namespace null
-
-#endif //NULLENGINE_INPUT_H

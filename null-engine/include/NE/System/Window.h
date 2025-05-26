@@ -1,8 +1,7 @@
 /**
  * Window.h
  */
-#ifndef NULLENGINE_WINDOW_H
-#define NULLENGINE_WINDOW_H
+#pragma once
 
 #include "NE/Core/Core.h"
 
@@ -93,5 +92,3 @@ namespace null
         };
     } // namespace system
 } // namespace null
-
-#endif //NULLENGINE_WINDOW_H

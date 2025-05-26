@@ -1,5 +1,4 @@
-#ifndef NULLENGINE_MOUSE_H
-#define NULLENGINE_MOUSE_H
+#pragma once
 
 #include "NE/Core/Core.h"
 
@@ -125,5 +124,3 @@ namespace null
         };
     } // namespace system
 } // namespace null
-
-#endif //NULLENGINE_MOUSE_H

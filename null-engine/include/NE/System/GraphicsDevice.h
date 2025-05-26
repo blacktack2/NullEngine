@@ -1,8 +1,7 @@
 /**
  * GraphicsDevice.h
  */
-#ifndef NULLENGINE_DEVICE_H
-#define NULLENGINE_DEVICE_H
+#pragma once
 
 #include "NE/Core/Core.h"
 
@@ -54,5 +53,3 @@ namespace null
         };
     } // namespace system
 } // namespace null
-
-#endif //NULLENGINE_DEVICE_H

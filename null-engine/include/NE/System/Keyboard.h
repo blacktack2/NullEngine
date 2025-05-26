@@ -1,5 +1,4 @@
-#ifndef NULLENGINE_KEYBOARD_H
-#define NULLENGINE_KEYBOARD_H
+#pragma once
 
 #include "NE/Core/Core.h"
 
@@ -232,5 +231,3 @@ namespace null
         };
     } // namespace system
 } // namespace null
-
-#endif //NULLENGINE_KEYBOARD_H

@@ -1,5 +1,4 @@
-#ifndef NULLENGINE_SYSTEMTYPES_H
-#define NULLENGINE_SYSTEMTYPES_H
+#pragma once
 
 namespace null
 {
@@ -22,5 +21,3 @@ namespace null
         class Gamepad;
     } // namespace system
 } // namespace null
-
-#endif //NULLENGINE_SYSTEMTYPES_H

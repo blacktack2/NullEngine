@@ -1,5 +1,4 @@
-#ifndef NULLENGINE_GAMEPAD_H
-#define NULLENGINE_GAMEPAD_H
+#pragma once
 
 #include "NE/Core/Core.h"
 
@@ -62,5 +61,3 @@ namespace null
         };
     } // namespace system
 } // namespace null
-
-#endif //NULLENGINE_GAMEPAD_H
