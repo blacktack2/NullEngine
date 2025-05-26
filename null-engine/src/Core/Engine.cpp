@@ -1,13 +1,13 @@
 #include "NE/Core/Engine.h"
 
-#include "NE/System/Device.h"
+#include "NE/System/GraphicsDevice.h"
 #include "NE/System/Window.h"
 
 null::core::Engine::Engine(const char* applicationName)
     :
     m_appName(applicationName),
     m_window(*this),
-    m_device(*this),
+    m_graphicsDevice(*this),
     m_input(*this),
     m_pipelineManager(*this),
     m_shaderManager(*this)
@@ -29,7 +29,7 @@ bool null::core::Engine::Init()
         return false;
     }
 
-    if (!m_device.Init())
+    if (!m_graphicsDevice.Init())
     {
         m_debugMessage = "Failed to load graphics device";
         debug::AssertFail("%s\n", m_debugMessage.c_str());

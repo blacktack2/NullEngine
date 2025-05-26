@@ -13,7 +13,7 @@ namespace null
 {
     namespace system
     {
-        struct DeviceData
+        struct GraphicsDeviceData
         {
             VkInstance               instance;
             VkPhysicalDevice         physicalDevice = VK_NULL_HANDLE;
@@ -31,7 +31,7 @@ namespace null
             VkDebugUtilsMessengerEXT debugMessenger;
 #endif //NE_DEBUG
         };
-        struct WindowDeviceData
+        struct WindowGraphicsDeviceData
         {
             std::vector<const char*> requiredExtensions;
         };

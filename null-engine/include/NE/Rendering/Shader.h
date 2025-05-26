@@ -30,7 +30,7 @@ namespace null
             Shader();
             ~Shader();
 
-            bool Init(system::Device& device, ShaderStage stage, const void* data, math::size dataSize, const char* name);
+            bool Init(system::GraphicsDevice& graphicsDevice, ShaderStage stage, const void* data, math::size dataSize, const char* name);
 
             ShaderData& GetShaderData()
             {
@@ -41,7 +41,7 @@ namespace null
                 return *m_shaderData;
             }
         private:
-            system::Device* m_device;
+            system::GraphicsDevice* m_graphicsDevice;
 
             std::unique_ptr<ShaderData> m_shaderData;
 

@@ -8,7 +8,7 @@ null::system::Window::Window(core::Engine& engine)
     :
     m_engine(engine),
     m_windowData(std::make_unique<WindowData>()),
-    m_windowDeviceData(std::make_unique<WindowDeviceData>())
+    m_windowGraphicsDeviceData(std::make_unique<WindowGraphicsDeviceData>())
 {
 }
 
@@ -30,9 +30,9 @@ bool null::system::Window::DeviceInit()
         return false;
     }
 
-    m_windowDeviceData->requiredExtensions = std::vector<const char*>(numExtensions);
+    m_windowGraphicsDeviceData->requiredExtensions = std::vector<const char*>(numExtensions);
 
-    result = SDL_Vulkan_GetInstanceExtensions(m_windowData->window, &numExtensions, m_windowDeviceData->requiredExtensions.data());
+    result = SDL_Vulkan_GetInstanceExtensions(m_windowData->window, &numExtensions, m_windowGraphicsDeviceData->requiredExtensions.data());
     if (result == SDL_FALSE)
     {
         m_debugMessage = "Failed to retrieve SDL2 required extension names";

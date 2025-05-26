@@ -5,16 +5,16 @@ namespace null
 {
     namespace system
     {
-        // Data for the device populated by the window
-        struct WindowDeviceData;
+        // Window data specific to device implementation
+        struct WindowGraphicsDeviceData;
 
         // Data specific to the window's API implementation
         struct WindowData;
         class Window;
 
         // Data specific to the device's API implementation
-        struct DeviceData;
-        class Device;
+        struct GraphicsDeviceData;
+        class GraphicsDevice;
 
         class Input;
         class Keyboard;

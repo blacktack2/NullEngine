@@ -5,7 +5,7 @@
 #include "NE/Rendering/PipelineManager.h"
 #include "NE/Rendering/ShaderManager.h"
 
-#include "NE/System/Device.h"
+#include "NE/System/GraphicsDevice.h"
 #include "NE/System/Input.h"
 #include "NE/System/Window.h"
 
@@ -59,13 +59,13 @@ namespace null
                 return m_window;
             }
 
-            system::Device& GetDevice()
+            system::GraphicsDevice& GetGraphicsDevice()
             {
-                return m_device;
+                return m_graphicsDevice;
             }
-            const system::Device& GetDevice() const
+            const system::GraphicsDevice& GetDevice() const
             {
-                return m_device;
+                return m_graphicsDevice;
             }
 
             system::Input& GetInput()
@@ -110,8 +110,8 @@ namespace null
             std::string m_appName;
 
             system::Window m_window;
-            system::Device m_device;
-            system::Input  m_input;
+            system::GraphicsDevice m_graphicsDevice;
+            system::Input m_input;
 
             render::PipelineManager m_pipelineManager;
             render::ShaderManager m_shaderManager;

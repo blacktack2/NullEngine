@@ -3,7 +3,7 @@
 #ifdef NE_BUILD_VULKAN
 
 #include "NE/API/Common_Vulkan.h"
-#include "NE/System/Device.h"
+#include "NE/System/GraphicsDevice.h"
 
 VkShaderStageFlagBits NeStageToVulkan(null::render::ShaderStage stage)
 {
@@ -35,9 +35,9 @@ null::render::Shader::~Shader()
     }
 }
 
-bool null::render::Shader::Init(system::Device& device, null::render::ShaderStage stage, const void* data, null::math::size dataSize, const char* name)
+bool null::render::Shader::Init(system::GraphicsDevice& graphicsDevice, null::render::ShaderStage stage, const void* data, null::math::size dataSize, const char* name)
 {
-    m_device = &device;
+    m_graphicsDevice = &graphicsDevice;
     m_shaderData = std::make_unique<ShaderData>();
     m_stage = stage;
     m_name = name;
@@ -48,7 +48,7 @@ bool null::render::Shader::Init(system::Device& device, null::render::ShaderStag
     createInfo.pCode = (math::uint32*)data;
 
     VkShaderModule shaderModule;
-    if (vkCreateShaderModule(m_device->GetDeviceData().device, &createInfo, nullptr, &shaderModule) != VK_SUCCESS)
+    if (vkCreateShaderModule(m_graphicsDevice->GetGraphicsDeviceData().device, &createInfo, nullptr, &shaderModule) != VK_SUCCESS)
     {
         debug::AssertFail("Failed to create shader '%s'\n", name);
         return false;
@@ -60,7 +60,7 @@ bool null::render::Shader::Init(system::Device& device, null::render::ShaderStag
     stageInfo.module = shaderModule;
     stageInfo.pName = "main";
 
-    vkDestroyShaderModule(m_device->GetDeviceData().device, shaderModule, nullptr);
+    vkDestroyShaderModule(m_graphicsDevice->GetGraphicsDeviceData().device, shaderModule, nullptr);
 
     return true;
 }

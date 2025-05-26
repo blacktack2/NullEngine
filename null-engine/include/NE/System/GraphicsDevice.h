@@ -16,11 +16,11 @@ namespace null
         /**
          * Wrapper class for managing the graphics device and all relevant API/functionality.
          */
-        class Device
+        class GraphicsDevice
         {
         public:
-            Device(core::Engine& engine);
-            ~Device();
+            GraphicsDevice(core::Engine& engine);
+            ~GraphicsDevice();
 
             /**
              * @return true on success, otherwise false. If false is returned use Device::GetDebugMessage to get an
@@ -33,13 +33,13 @@ namespace null
                 return m_debugMessage;
             }
 
-            DeviceData& GetDeviceData()
+            GraphicsDeviceData& GetGraphicsDeviceData()
             {
-                return *m_deviceData;
+                return *m_graphicsDeviceData;
             }
-            const DeviceData& GetDeviceData() const
+            const GraphicsDeviceData& GetGraphicsDeviceData() const
             {
-                return *m_deviceData;
+                return *m_graphicsDeviceData;
             }
         private:
             void Destroy();
@@ -48,7 +48,7 @@ namespace null
         private:
             core::Engine& m_engine;
 
-            std::unique_ptr<DeviceData> m_deviceData;
+            std::unique_ptr<GraphicsDeviceData> m_graphicsDeviceData;
 
             std::string m_debugMessage;
         };

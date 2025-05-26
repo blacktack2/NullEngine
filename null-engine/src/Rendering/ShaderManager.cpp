@@ -35,7 +35,7 @@ bool null::render::ShaderManager::Init()
         stream.seekg(0);
         stream.read(data.data(), fileSize);
 
-        m_shaders[i].Init(m_engine.GetDevice(), source.stage, data.data(), data.size(), std::filesystem::path(source.sourceFile).filename().c_str());
+        m_shaders[i].Init(m_engine.GetGraphicsDevice(), source.stage, data.data(), data.size(), std::filesystem::path(source.sourceFile).filename().c_str());
     }
     return true;
 }

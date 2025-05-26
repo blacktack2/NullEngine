@@ -60,13 +60,13 @@ namespace null
             {
                 return *m_windowData;
             }
-            WindowDeviceData& GetWindowDeviceData()
+            WindowGraphicsDeviceData& GetGraphicsDeviceWindowData()
             {
-                return *m_windowDeviceData;
+                return *m_windowGraphicsDeviceData;
             }
-            const WindowDeviceData& GetWindowDeviceData() const
+            const WindowGraphicsDeviceData& GetGraphicsDeviceWindowData() const
             {
-                return *m_windowDeviceData;
+                return *m_windowGraphicsDeviceData;
             }
         private:
             void Destroy();
@@ -78,7 +78,7 @@ namespace null
             core::Engine& m_engine;
 
             std::unique_ptr<WindowData> m_windowData;
-            std::unique_ptr<WindowDeviceData> m_windowDeviceData;
+            std::unique_ptr<WindowGraphicsDeviceData> m_windowGraphicsDeviceData;
 
             math::uint32 m_width  = 100;
             math::uint32 m_height = 100;

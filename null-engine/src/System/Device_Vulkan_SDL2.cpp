@@ -1,4 +1,4 @@
-#include "NE/System/Device.h"
+#include "NE/System/GraphicsDevice.h"
 
 #if defined(NE_BUILD_SDL2) && defined(NE_BUILD_VULKAN)
 
@@ -6,14 +6,14 @@
 
 #include "NE/Core/Engine.h"
 
-null::system::Device::Device(core::Engine& engine)
+null::system::GraphicsDevice::GraphicsDevice(core::Engine& engine)
         :
         m_engine(engine),
-        m_deviceData(std::make_unique<DeviceData>())
+        m_graphicsDeviceData(std::make_unique<GraphicsDeviceData>())
 {
 }
 
-null::system::Device::~Device()
+null::system::GraphicsDevice::~GraphicsDevice()
 {
     Destroy();
 }
@@ -33,9 +33,9 @@ bool CreateSurface(SDL_Window* window, VkInstance& instance, VkSurfaceKHR& surfa
     return true;
 }
 
-bool null::system::Device::WindowInit()
+bool null::system::GraphicsDevice::WindowInit()
 {
-    if (!CreateSurface(m_engine.GetWindow().GetWindowData().window, m_deviceData->instance, m_deviceData->surface))
+    if (!CreateSurface(m_engine.GetWindow().GetWindowData().window, m_graphicsDeviceData->instance, m_graphicsDeviceData->surface))
     {
         m_debugMessage = "Failed to create Vulkan surface";
         debug::AssertFail("%s\n", m_debugMessage.c_str());
